@@ -5,6 +5,25 @@ All notable changes to CalendarPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-beta.0] - 2026-05-05
+
+### Added
+
+- cache calendar month grid behind a `MonthGridCache` keyed on display state
+- pool `DateFormatter` instances behind `DateFormatters` infrastructure
+- regression tests for recurring reminder occurrences and cross-day selection sync
+- `solarDateKey` integer key on `CalendarDay` for formatter-free identifiers
+
+### Changed
+
+- replace `LazyVGrid` with static `Grid`/`GridRow` for the calendar grid
+- `WeatherService.manualLocation` now mutated via `updateLocation(_:)` instead of full reassignment
+
+### Fixed
+
+- remove duplicate `.frame` and `.padding` modifiers on calendar day cells
+- stabilize weather service ownership for Swift 6 strict concurrency
+
 ## [0.1.4-beta.1] - 2026-04-29
 
 ### Added
