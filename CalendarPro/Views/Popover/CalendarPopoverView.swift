@@ -31,6 +31,7 @@ struct CalendarPopoverView: View {
     let weekendIndices: Set<Int>
     let monthDays: [CalendarDay]
     let highlightWeekends: Bool
+    let showDayEventDots: Bool
     let showEvents: Bool
     let emptyStateText: String
     let selectedDate: Date?
@@ -118,6 +119,7 @@ struct CalendarPopoverView: View {
                 monthDays: monthDays,
                 highlightWeekends: highlightWeekends,
                 weekendIndices: weekendIndices,
+                showDayEventDots: showDayEventDots,
                 onSelectDate: onSelectDate
             )
 

@@ -30,6 +30,8 @@ struct CalendarDay: Equatable, Identifiable {
     let lunarText: String?
     let lunarTextSemantic: LunarTextSemantic
     let badges: [DayBadge]
+    /// Event count for the day event dots feature (nil = not fetched / feature off).
+    let eventCount: Int?
 
     var id: Date { date }
 }

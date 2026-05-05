@@ -117,6 +117,7 @@ struct MenuBarPreferences: Codable, Equatable {
     var manualLocation: WeatherLocation? = nil
     var showUpcomingIndicator: Bool
     var upcomingReminderMinutes: Int
+    var showDayEventDots: Bool
 
     var requiresSecondRefresh: Bool {
         tokens.contains { $0.token == .time && $0.isEnabled && $0.style == .full }
@@ -196,7 +197,8 @@ struct MenuBarPreferences: Codable, Equatable {
             locationMode: .automatic,
             manualLocation: nil,
             showUpcomingIndicator: true,
-            upcomingReminderMinutes: 15
+            upcomingReminderMinutes: 15,
+            showDayEventDots: false
         )
     }
 
@@ -223,7 +225,8 @@ struct MenuBarPreferences: Codable, Equatable {
         locationMode: .automatic,
         manualLocation: nil,
         showUpcomingIndicator: true,
-        upcomingReminderMinutes: 15
+        upcomingReminderMinutes: 15,
+        showDayEventDots: false
     )
 }
 
@@ -248,6 +251,7 @@ extension MenuBarPreferences {
         case manualLocation
         case showUpcomingIndicator
         case upcomingReminderMinutes
+        case showDayEventDots
     }
 
     init(from decoder: Decoder) throws {
@@ -273,7 +277,8 @@ extension MenuBarPreferences {
             locationMode: try container.decodeIfPresent(LocationMode.self, forKey: .locationMode) ?? .automatic,
             manualLocation: try container.decodeIfPresent(WeatherLocation.self, forKey: .manualLocation),
             showUpcomingIndicator: try container.decodeIfPresent(Bool.self, forKey: .showUpcomingIndicator) ?? true,
-            upcomingReminderMinutes: try container.decodeIfPresent(Int.self, forKey: .upcomingReminderMinutes) ?? 15
+            upcomingReminderMinutes: try container.decodeIfPresent(Int.self, forKey: .upcomingReminderMinutes) ?? 15,
+            showDayEventDots: try container.decodeIfPresent(Bool.self, forKey: .showDayEventDots) ?? false
         )
     }
 
@@ -298,5 +303,6 @@ extension MenuBarPreferences {
         try container.encodeIfPresent(manualLocation, forKey: .manualLocation)
         try container.encode(showUpcomingIndicator, forKey: .showUpcomingIndicator)
         try container.encode(upcomingReminderMinutes, forKey: .upcomingReminderMinutes)
+        try container.encode(showDayEventDots, forKey: .showDayEventDots)
     }
 }

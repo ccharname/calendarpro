@@ -77,7 +77,8 @@ final class ClockRenderServiceTests: XCTestCase {
             showAlmanac: false,
             showWeather: false,
             showUpcomingIndicator: true,
-            upcomingReminderMinutes: 15
+            upcomingReminderMinutes: 15,
+            showDayEventDots: false
         )
 
         let text = renderer.render(
@@ -117,7 +118,8 @@ final class ClockRenderServiceTests: XCTestCase {
             showAlmanac: false,
             showWeather: false,
             showUpcomingIndicator: true,
-            upcomingReminderMinutes: 15
+            upcomingReminderMinutes: 15,
+            showDayEventDots: false
         )
 
         let text = renderer.render(
@@ -156,7 +158,8 @@ final class ClockRenderServiceTests: XCTestCase {
             showAlmanac: false,
             showWeather: false,
             showUpcomingIndicator: true,
-            upcomingReminderMinutes: 15
+            upcomingReminderMinutes: 15,
+            showDayEventDots: false
         )
 
         let text = renderer.render(
@@ -195,7 +198,8 @@ final class ClockRenderServiceTests: XCTestCase {
             showAlmanac: false,
             showWeather: false,
             showUpcomingIndicator: true,
-            upcomingReminderMinutes: 15
+            upcomingReminderMinutes: 15,
+            showDayEventDots: false
         )
 
         let text = renderer.render(

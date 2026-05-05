@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - pool `DateFormatter` instances behind `DateFormatters` infrastructure
 - regression tests for recurring reminder occurrences and cross-day selection sync
 - `solarDateKey` integer key on `CalendarDay` for formatter-free identifiers
+- MeeGo cell restyle: squircle tiles (corner radius 7pt, continuous), top→bottom luminosity gradient, 1px inner highlight stroke, outer glow ring on highlight states
+- LED indicator dots (4pt) replacing OFF/WRK/Today text Capsule pills; red for holidays, blue for adjustment days, orange for solar terms, white on today's yellow tile
+- today tile uses `#FFCF40`/`#FFD75E` yellow token; selected tile uses indigo/violet `rgba(120,140,255,0.32)` token
+- weekend day numbers use `#E04F5F` (light) / `#FF6B7A` (dark) per MeeGo spec
+- tap scale animation (0.96 over 100ms) and hover ring fade-in (120ms)
+- `MenuBarPreferences.showDayEventDots` toggle (default false) with Codable migration
+- `MonthEventCountCache` stub for event-count dot feature (lifecycle wiring deferred)
+- `CalendarDay.eventCount: Int?` field for future event-dot rendering
+- design doc `docs/plans/2026-05-05-meego-relaunch-design.md` with full token tables
+- `MeegoCellPreview.swift` with 8-variant SwiftUI preview (4 states × 2 color schemes)
 
 ### Changed
 
