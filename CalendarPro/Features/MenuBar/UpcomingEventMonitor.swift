@@ -150,8 +150,7 @@ final class UpcomingEventMonitor: ObservableObject {
     private static let accentColorHex = "#007AFF"
 
     private static func buildTooltip(for items: [CalendarItem], now: Date, calendar: Calendar) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
+        let formatter = DateFormatters.hourMinute24
 
         let summaries = items.prefix(3).map { item -> String in
             let title = item.title ?? ""

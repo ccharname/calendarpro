@@ -258,10 +258,7 @@ struct CalendarPopoverView: View {
     }
 
     private func formattedSelectedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("MMMdEEEE")
-        return formatter.string(from: date)
+        DateFormatters.selectedDateHeader(for: AppLocalization.locale).string(from: date)
     }
 
     private var popoverBackground: some View {

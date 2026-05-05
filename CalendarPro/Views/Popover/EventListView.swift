@@ -204,10 +204,7 @@ struct EventTimelineSnapshot {
     }
 
     private static func format(minutes: Int) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
+        let formatter = DateFormatters.shortTime(for: AppLocalization.locale)
         var components = DateComponents()
         components.hour = minutes / 60
         components.minute = minutes % 60
@@ -541,11 +538,7 @@ struct EventListView: View {
     }
 
     private var formattedCurrentTime: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        return formatter.string(from: currentTime)
+        DateFormatters.shortTime(for: AppLocalization.locale).string(from: currentTime)
     }
 
     private func markerY(for frame: CGRect, progress: Double) -> CGFloat {

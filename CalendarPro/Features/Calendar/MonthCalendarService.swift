@@ -21,6 +21,7 @@ struct MonthCalendarService {
 
             return CalendarDay(
                 date: date,
+                solarDateKey: CalendarDay.makeSolarDateKey(from: date),
                 isInDisplayedMonth: calendar.isDate(date, equalTo: monthStart, toGranularity: .month),
                 isToday: calendar.isDate(date, inSameDayAs: now()),
                 isSelected: false,

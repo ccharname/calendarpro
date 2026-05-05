@@ -539,11 +539,7 @@ struct WeatherStripView: View {
     }
 
     private func formattedCompactForecastDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = AppLocalization.locale
-        formatter.dateFormat = "M/d"
-        return formatter.string(from: date)
+        DateFormatters.compactMonthDay(for: AppLocalization.locale).string(from: date)
     }
 
     private var expandedMetricsSection: some View {

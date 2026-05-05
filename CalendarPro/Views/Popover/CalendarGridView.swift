@@ -182,12 +182,7 @@ private struct CalendarDayCellView: View {
     }
 
     private var dayIdentifier: String {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        formatter.dateFormat = "yyyy-MM-dd"
-        return "calendar-day-\(formatter.string(from: day.date))"
+        "calendar-day-\(day.solarDateKey)"
     }
 
     private var solarTextColor: Color {

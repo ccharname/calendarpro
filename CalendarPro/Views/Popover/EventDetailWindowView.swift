@@ -333,10 +333,7 @@ struct EventDetailWindowView: View {
     }
 
     private var dateRangeText: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("MMMdEEEE")
-
+        let formatter = DateFormatters.selectedDateHeader(for: AppLocalization.locale)
         let endDate = visibleEndDate
         let calendar = Calendar.autoupdatingCurrent
 

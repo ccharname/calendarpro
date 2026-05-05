@@ -13,17 +13,11 @@ struct MonthHeaderView: View {
     let onResetToToday: () -> Void
 
     private var yearText: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("y")
-        return formatter.string(from: displayedMonth)
+        DateFormatters.yearOnly(for: AppLocalization.locale).string(from: displayedMonth)
     }
 
     private var monthText: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("MMMM")
-        return formatter.string(from: displayedMonth)
+        DateFormatters.monthFull(for: AppLocalization.locale).string(from: displayedMonth)
     }
 
     var body: some View {

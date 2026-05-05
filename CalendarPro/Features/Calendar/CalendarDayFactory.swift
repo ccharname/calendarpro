@@ -32,6 +32,7 @@ struct CalendarDayFactory {
 
         return CalendarDay(
             date: date,
+            solarDateKey: CalendarDay.makeSolarDateKey(from: date),
             isInDisplayedMonth: calendar.isDate(date, equalTo: displayedMonth ?? date, toGranularity: .month),
             isToday: calendar.isDate(date, inSameDayAs: monthService.now()),
             isSelected: selectedDate != nil && calendar.isDate(date, inSameDayAs: selectedDate!),
@@ -61,6 +62,7 @@ struct CalendarDayFactory {
 
             return CalendarDay(
                 date: day.date,
+                solarDateKey: day.solarDateKey,
                 isInDisplayedMonth: day.isInDisplayedMonth,
                 isToday: day.isToday,
                 isSelected: selectedDate != nil && calendar.isDate(day.date, inSameDayAs: selectedDate!),

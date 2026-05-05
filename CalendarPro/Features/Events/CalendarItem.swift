@@ -280,8 +280,7 @@ private extension EKRecurrenceRule {
 
     private func weekdayName(_ weekday: EKWeekday) -> String {
         let calendar = Calendar.autoupdatingCurrent
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
+        let formatter = DateFormatters.weekdaySymbolProvider(for: AppLocalization.locale)
         let symbols = formatter.shortStandaloneWeekdaySymbols ?? calendar.shortWeekdaySymbols
 
         switch weekday {

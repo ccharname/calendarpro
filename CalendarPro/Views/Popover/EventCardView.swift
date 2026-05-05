@@ -108,10 +108,7 @@ struct EventCardView: View {
             return L("No Time")
         }
 
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
+        let formatter = DateFormatters.shortTime(for: AppLocalization.locale)
 
         let start = formatter.string(from: startDate)
 

@@ -468,10 +468,7 @@ struct CalendarItemComposerView: View {
     }
 
     private var formattedSelectedDate: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("MMMdEEEE")
-        return formatter.string(from: selectedDate)
+        DateFormatters.selectedDateHeader(for: AppLocalization.locale).string(from: selectedDate)
     }
 
     private var surfaceBackground: some View {

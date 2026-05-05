@@ -767,14 +767,7 @@ private struct OpenMeteoResponse: Decodable, Sendable {
             return values[index]
         }
 
-        private static let dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.calendar = Calendar(identifier: .gregorian)
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            formatter.timeZone = .autoupdatingCurrent
-            formatter.dateFormat = "yyyy-MM-dd"
-            return formatter
-        }()
+        private static var dateFormatter: DateFormatter { DateFormatters.weatherISODay }
     }
 }
 
@@ -839,13 +832,6 @@ private struct OpenMeteoAirQualityResponse: Decodable, Sendable {
             return values[index]
         }
 
-        private static let dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.calendar = Calendar(identifier: .gregorian)
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            formatter.timeZone = .autoupdatingCurrent
-            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
-            return formatter
-        }()
+        private static var dateFormatter: DateFormatter { DateFormatters.weatherISOMinute }
     }
 }

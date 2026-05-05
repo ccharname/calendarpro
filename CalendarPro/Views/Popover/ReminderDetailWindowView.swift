@@ -177,10 +177,7 @@ struct ReminderDetailWindowView: View {
               let date = Calendar.current.date(from: components) else {
             return nil
         }
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("MMMdEEEE")
-        return formatter.string(from: date)
+        return DateFormatters.selectedDateHeader(for: AppLocalization.locale).string(from: date)
     }
 
     private var dueTimeText: String? {
@@ -191,11 +188,7 @@ struct ReminderDetailWindowView: View {
         guard let date = Calendar.current.date(from: components) else {
             return nil
         }
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        return DateFormatters.shortTime(for: AppLocalization.locale).string(from: date)
     }
 
     private var recurrenceText: String? {
@@ -218,11 +211,7 @@ struct ReminderDetailWindowView: View {
         }
         let descriptions = alarms.compactMap { alarm -> String? in
             if let absoluteDate = alarm.absoluteDate {
-                let formatter = DateFormatter()
-                formatter.locale = AppLocalization.locale
-                formatter.dateStyle = .short
-                formatter.timeStyle = .short
-                return formatter.string(from: absoluteDate)
+                return DateFormatters.shortDateTime(for: AppLocalization.locale).string(from: absoluteDate)
             }
             let offset = alarm.relativeOffset
             if offset == 0 {
@@ -259,11 +248,7 @@ struct ReminderDetailWindowView: View {
     // MARK: - Helpers
 
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        DateFormatters.shortDateTime(for: AppLocalization.locale).string(from: date)
     }
 
     // MARK: - Background

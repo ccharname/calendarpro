@@ -77,9 +77,7 @@ struct VacationOpportunityCardView: View {
     }
 
     private var dateRangeText: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("MMMd")
+        let formatter = DateFormatters.shortMonthDay(for: AppLocalization.locale)
         return "\(formatter.string(from: opportunity.startDate)) - \(formatter.string(from: opportunity.endDate))"
     }
 

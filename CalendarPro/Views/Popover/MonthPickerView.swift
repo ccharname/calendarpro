@@ -9,9 +9,7 @@ struct MonthPickerView: View {
     let onEnterYearSelection: () -> Void
 
     private let months: [String] = {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        return formatter.monthSymbols
+        DateFormatters.monthSymbolsProvider(for: AppLocalization.locale).monthSymbols
     }()
 
     var body: some View {
@@ -59,9 +57,7 @@ struct MonthPickerView: View {
     }
 
     private var yearDisplayText: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLocalization.locale
-        formatter.setLocalizedDateFormatFromTemplate("y")
+        let formatter = DateFormatters.yearOnly(for: AppLocalization.locale)
         var components = DateComponents()
         components.year = displayedYear
         if let date = Calendar(identifier: .gregorian).date(from: components) {

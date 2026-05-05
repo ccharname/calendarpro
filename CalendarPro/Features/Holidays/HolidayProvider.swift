@@ -71,16 +71,9 @@ struct BundledHolidayDataLoader {
     }
 
     private static func makeDate(_ value: String) throws -> Date {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        formatter.dateFormat = "yyyy-MM-dd"
-
-        guard let date = formatter.date(from: value) else {
+        guard let date = DateFormatters.gregorianISODay.date(from: value) else {
             throw HolidayProviderError.invalidDate(value)
         }
-
         return date
     }
 }
