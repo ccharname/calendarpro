@@ -5,6 +5,36 @@ All notable changes to CalendarPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-beta.1] - 2026-05-05
+
+### Added
+
+- week-number gutter on the calendar grid (ISO 8601, derived from each row's middle day)
+- variable row count (5 or 6) — months that fit in 5 rows no longer show a wasted overflow row
+- background prewarming of lunar + holiday caches at app launch (covers current month ±1)
+- per-(region, year) cache for resolved holiday occurrences, invalidated on remote feed refresh
+- per-(day, timezone) memoization of `LunarDateDescriptor`
+
+### Changed
+
+- MeeGo cell visual: 12pt continuous squircle (~35% × short side, N9/Harmattan-spec aligned), 16% top→bottom gradient, glossy top-half overlay, 1px white inner rim, soft outer drop shadow on resting tiles, colored glow on highlight states
+- restore Today / OFF / WRK text capsule pills (LED-dot variant from beta.0 reverted)
+- when both today and a holiday apply, only the holiday pill renders (yellow tile already signals "today")
+- today's deep-amber day number and subtitle for contrast on the yellow tile
+- day number font 13→16pt; lunar/holiday subtitle 9→8pt
+- popover slide-down animation disabled — instant menu-bar pop
+- `displayCalendar` cached statically (Mon-first / Sun-first), no longer rebuilt on each accessor
+- `popoverBackground` LinearGradient hoisted to a static constant
+
+### Removed
+
+- `showDayEventDots` toggle and `MonthEventCountCache` stub (never wired; will return when properly built)
+- `CalendarDay.eventCount` field
+
+### Fixed
+
+- `PopoverController.showPopover` no longer hardcodes Sunday-first calendar when syncing day selection
+
 ## [0.2.0-beta.0] - 2026-05-05
 
 ### Added
