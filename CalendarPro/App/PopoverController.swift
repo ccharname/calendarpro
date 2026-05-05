@@ -210,11 +210,29 @@ final class PopoverController: NSObject, NSPopoverDelegate {
     private func showPopover(relativeTo button: NSView) {
         timeRefreshCoordinator.refreshNow()
         viewModel.checkAndResetIfNeeded()
-        viewModel.syncCurrentDaySelectionIfNeeded(calendar: .autoupdatingCurrent)
+        viewModel.syncCurrentDaySelectionIfNeeded(calendar: displayCalendar)
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         interactionMonitor.start { [weak self] in
             self?.closePopover()
         }
+    }
+
+    private static let mondayFirstCalendar: Calendar = {
+        var c = Calendar.autoupdatingCurrent
+        c.firstWeekday = 2
+        return c
+    }()
+
+    private static let sundayFirstCalendar: Calendar = {
+        var c = Calendar.autoupdatingCurrent
+        c.firstWeekday = 1
+        return c
+    }()
+
+    private var displayCalendar: Calendar {
+        settingsStore.menuBarPreferences.weekStart == .monday
+            ? Self.mondayFirstCalendar
+            : Self.sundayFirstCalendar
     }
 
     private func closePopover() {
