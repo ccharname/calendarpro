@@ -569,10 +569,25 @@ struct RootPopoverView: View {
         onDismissEventDetailWindow()
     }
 
+    /// `displayCalendar` is touched on every body re-eval (weekdaySymbols / weekendColumnIndices /
+    /// syncCurrentDay / refreshGridCache, etc.). Cache the two possible Calendars statically; the
+    /// only input is `weekStart`, so look-up is a single switch.
+    private static let mondayFirstCalendar: Calendar = {
+        var c = Calendar.autoupdatingCurrent
+        c.firstWeekday = 2
+        return c
+    }()
+
+    private static let sundayFirstCalendar: Calendar = {
+        var c = Calendar.autoupdatingCurrent
+        c.firstWeekday = 1
+        return c
+    }()
+
     private var displayCalendar: Calendar {
-        var calendar = Calendar.autoupdatingCurrent
-        calendar.firstWeekday = settingsStore.menuBarPreferences.weekStart == .monday ? 2 : 1
-        return calendar
+        settingsStore.menuBarPreferences.weekStart == .monday
+            ? Self.mondayFirstCalendar
+            : Self.sundayFirstCalendar
     }
 
     private var preferredWeatherLocation: WeatherLocation? {

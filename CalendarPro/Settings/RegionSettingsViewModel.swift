@@ -70,6 +70,7 @@ final class RegionSettingsViewModel: ObservableObject {
         do {
             let result = try await feedClient.refreshIfNeeded(force: true)
             refreshStatusMessage = Self.makeRefreshStatus(from: result)
+            HolidayResolver.invalidateYearCache()
             store.noteHolidayDataUpdated()
         } catch {
             refreshStatusMessage = Self.makeRefreshStatus(cacheStore: cacheStore, feedClient: feedClient, error: error)

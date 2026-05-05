@@ -264,13 +264,17 @@ struct CalendarPopoverView: View {
     }
 
     private var popoverBackground: some View {
-        LinearGradient(
-            colors: [
-                Color(nsColor: .windowBackgroundColor),
-                Color.accentColor.opacity(0.04)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        Self.popoverBackgroundGradient
     }
+
+    /// Hoisted out of `body` — the gradient instance is identical every render and shouldn't
+    /// be reconstructed on each redraw (popover-wide redraws fire on time tick / weather refresh).
+    private static let popoverBackgroundGradient = LinearGradient(
+        colors: [
+            Color(nsColor: .windowBackgroundColor),
+            Color.accentColor.opacity(0.04)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
 }

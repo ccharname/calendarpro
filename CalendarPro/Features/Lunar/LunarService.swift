@@ -17,7 +17,22 @@ struct LunarService {
         self.solarTermResolver = solarTermResolver
     }
 
+    /// (yyyyMMdd, timezone-identifier) → LunarDateDescriptor.
+    /// Lunar conversion is pure: same gregorian-day-in-timezone always produces
+    /// the same chinese-calendar tuple. Caching avoids 42 repeats per grid build.
+    nonisolated(unsafe) private static var cache: [String: LunarDateDescriptor] = [:]
+    private static let cacheLock = NSLock()
+
     func describe(date: Date, timeZone: TimeZone = .autoupdatingCurrent) -> LunarDateDescriptor {
+        let key = Self.cacheKey(for: date, timeZone: timeZone)
+
+        Self.cacheLock.lock()
+        if let cached = Self.cache[key] {
+            Self.cacheLock.unlock()
+            return cached
+        }
+        Self.cacheLock.unlock()
+
         let components = chineseCalendar.dateComponents(in: timeZone, from: date)
         let year = components.year ?? 1
         let month = components.month ?? 1
@@ -28,7 +43,7 @@ struct LunarService {
         let monthText = Self.monthText(for: month, isLeapMonth: isLeapMonth)
         let dayText = Self.dayText(for: day)
 
-        return LunarDateDescriptor(
+        let descriptor = LunarDateDescriptor(
             year: year,
             month: month,
             day: day,
@@ -39,6 +54,20 @@ struct LunarService {
             festivalName: festivalResolver.festivalName(month: month, day: day, isLeapMonth: isLeapMonth),
             solarTermName: solarTermResolver.solarTermName(for: date, timeZone: timeZone)
         )
+
+        Self.cacheLock.lock()
+        Self.cache[key] = descriptor
+        Self.cacheLock.unlock()
+
+        return descriptor
+    }
+
+    private static func cacheKey(for date: Date, timeZone: TimeZone) -> String {
+        // Day-since-epoch in the target timezone, no Calendar work needed.
+        // Two Date values that fall on the same wall-clock day produce the same key.
+        let offset = Double(timeZone.secondsFromGMT(for: date))
+        let dayInTZ = Int(floor((date.timeIntervalSince1970 + offset) / 86_400))
+        return "\(dayInTZ)|\(timeZone.identifier)"
     }
 
     private static func yearText(for year: Int) -> String {

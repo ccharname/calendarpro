@@ -34,7 +34,7 @@ struct HolidayResolver {
         for regionID in activeRegionIDs {
             guard let provider = registry.provider(for: regionID) else { continue }
             for year in years.sorted() {
-                resolved.append(contentsOf: try provider.holidays(forYear: year))
+                resolved.append(contentsOf: try Self.cachedYearOccurrences(provider: provider, regionID: regionID, year: year))
             }
         }
 
@@ -55,5 +55,42 @@ struct HolidayResolver {
                 return lhs.kind.priority > rhs.kind.priority
             }
         }
+    }
+
+    // MARK: - Per-(region, year) provider cache
+    //
+    // Provider.holidays(forYear:) decodes JSON / runs region-specific resolution every call.
+    // The resolved occurrences for (regionID, year) are pure — cache them across grid builds.
+
+    private static let cacheLock = NSLock()
+    nonisolated(unsafe) private static var yearCache: [String: [HolidayOccurrence]] = [:]
+
+    private static func cachedYearOccurrences(
+        provider: HolidayProvider,
+        regionID: String,
+        year: Int
+    ) throws -> [HolidayOccurrence] {
+        let key = "\(regionID)|\(year)"
+        cacheLock.lock()
+        if let cached = yearCache[key] {
+            cacheLock.unlock()
+            return cached
+        }
+        cacheLock.unlock()
+
+        let occurrences = try provider.holidays(forYear: year)
+
+        cacheLock.lock()
+        yearCache[key] = occurrences
+        cacheLock.unlock()
+
+        return occurrences
+    }
+
+    /// Test-only / invalidation hook for hot-reload of holiday feed.
+    static func invalidateYearCache() {
+        cacheLock.lock()
+        yearCache.removeAll()
+        cacheLock.unlock()
     }
 }

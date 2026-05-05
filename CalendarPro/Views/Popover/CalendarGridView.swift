@@ -12,6 +12,9 @@ struct CalendarGridView: View {
     var body: some View {
         Grid(horizontalSpacing: 6, verticalSpacing: 6) {
             GridRow {
+                // Week-number gutter header — empty spacer, fixed width
+                Color.clear.frame(width: weekNumberGutterWidth)
+
                 ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { index, symbol in
                     Text(symbol)
                         .font(.system(size: 12, weight: .medium, design: .rounded))
@@ -20,8 +23,13 @@ struct CalendarGridView: View {
                 }
             }
 
-            ForEach(0..<6, id: \.self) { rowIndex in
+            ForEach(0..<rowCount, id: \.self) { rowIndex in
                 GridRow {
+                    Text(weekNumberText(for: rowIndex))
+                        .font(.system(size: 10, weight: .regular, design: .rounded).monospacedDigit())
+                        .foregroundStyle(Color.secondary.opacity(0.55))
+                        .frame(width: weekNumberGutterWidth)
+
                     ForEach(0..<7, id: \.self) { colIndex in
                         let dayIndex = rowIndex * 7 + colIndex
                         if dayIndex < monthDays.count {
@@ -40,6 +48,25 @@ struct CalendarGridView: View {
         }
     }
 
+    // MARK: - Week numbers
+
+    private static let isoCalendar: Calendar = {
+        var c = Calendar(identifier: .iso8601)
+        c.timeZone = .current
+        return c
+    }()
+
+    private let weekNumberGutterWidth: CGFloat = 20
+
+    /// ISO 8601 week number for the row. Use middle-of-week day (index +3) so the
+    /// number is stable regardless of weekStart preference.
+    private func weekNumberText(for rowIndex: Int) -> String {
+        let referenceIndex = rowIndex * 7 + 3
+        guard referenceIndex < monthDays.count else { return "" }
+        let week = Self.isoCalendar.component(.weekOfYear, from: monthDays[referenceIndex].date)
+        return String(week)
+    }
+
     private func weekdayHeaderColor(isWeekend: Bool) -> Color {
         guard highlightWeekends && isWeekend else { return .secondary }
         return colorScheme == .dark
@@ -47,12 +74,19 @@ struct CalendarGridView: View {
             : Color(red: 0.85, green: 0.35, blue: 0.35)
     }
 
+    /// Number of day rows (5 or 6) derived from monthDays count.
+    private var rowCount: Int {
+        max(1, (monthDays.count + 6) / 7)
+    }
+
 }
 
 // MARK: - MeeGo Day Cell
 
-// cornerRadius: 21% × min cell height (34pt) ≈ 7pt (squircle token)
-private let meegoCellCornerRadius: CGFloat = 7
+// MeeGo icon-tile squircle (continuous curvature).
+// N9 / Harmattan 80×80 spec: 22–24pt corner = 27–30% × short side.
+// We use 35% (12pt × 34pt short side) — N9 baseline + slight 玩具感 amplification.
+private let meegoCellCornerRadius: CGFloat = 12
 
 private struct CalendarDayCellView: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -64,38 +98,45 @@ private struct CalendarDayCellView: View {
     let showDayEventDots: Bool
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            // Background with MeeGo gradient
+        ZStack {
+            // 1. Tile body — gradient fill simulating top-down luminosity drop
             RoundedRectangle(cornerRadius: meegoCellCornerRadius, style: .continuous)
                 .fill(cellGradient)
-                // Outer glow ring — only on highlight states
-                .shadow(
-                    color: glowColor,
-                    radius: isHighlighted ? 6 : 0,
-                    x: 0,
-                    y: 0
-                )
 
-            // Inner highlight stroke (1px top white stroke)
+            // 2. Glossy top-half highlight — half-height white fade overlay (MeeGo "icon gloss")
+            RoundedRectangle(cornerRadius: meegoCellCornerRadius, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(glossOpacity),
+                            Color.white.opacity(0)
+                        ],
+                        startPoint: .top,
+                        endPoint: UnitPoint(x: 0.5, y: 0.55)
+                    )
+                )
+                .allowsHitTesting(false)
+
+            // 3. Inner top-edge highlight (1px crisp white rim, fades down)
             RoundedRectangle(cornerRadius: meegoCellCornerRadius, style: .continuous)
                 .strokeBorder(
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(colorScheme == .dark ? 0.08 : 0.18),
+                            Color.white.opacity(colorScheme == .dark ? 0.22 : 0.45),
                             Color.white.opacity(0)
                         ],
                         startPoint: .top,
-                        endPoint: .bottom
+                        endPoint: UnitPoint(x: 0.5, y: 0.4)
                     ),
                     lineWidth: 1
                 )
 
-            // Outer border (hover/selection state) with fade animation
+            // 4. Outer border (hover/selection state) with fade animation
             RoundedRectangle(cornerRadius: meegoCellCornerRadius, style: .continuous)
                 .strokeBorder(cellBorderColor, lineWidth: cellBorderWidth)
                 .animation(.easeInOut(duration: 0.12), value: isHovered)
 
-            // Content column
+            // 5. Content (day number + subtitle + optional event dots)
             VStack(spacing: 2) {
                 Text(day.solarText)
                     .font(.system(size: 13, weight: day.isToday ? .semibold : .regular, design: .rounded))
@@ -113,7 +154,6 @@ private struct CalendarDayCellView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
 
-                // Day event dots row (MeeGo lucky-toolkit style)
                 if showDayEventDots, let count = day.eventCount, count > 0 {
                     HStack(spacing: 2) {
                         ForEach(0..<min(count, 3), id: \.self) { _ in
@@ -128,15 +168,30 @@ private struct CalendarDayCellView: View {
             .padding(.vertical, 2)
             .padding(.horizontal, 4)
 
-            // LED indicator dot — top-trailing, 1pt outset
-            if let ledColor = ledIndicatorColor {
-                Circle()
-                    .fill(ledColor)
-                    .frame(width: 4, height: 4)
-                    .offset(x: 1, y: -1)
+            // 6. Top-trailing badge pill — only one at a time to avoid crowding.
+            // Priority: holiday/workday badge wins (yellow tile already screams "today").
+            VStack {
+                HStack(spacing: 2) {
+                    Spacer()
+                    if let indicator = badgeIndicator {
+                        badgeView(indicator)
+                    } else if day.isToday {
+                        todayBadgeView
+                    }
+                }
+                Spacer()
             }
+            .padding(.top, -4)
+            .padding(.trailing, -4)
+            .allowsHitTesting(false)
         }
-        .clipShape(RoundedRectangle(cornerRadius: meegoCellCornerRadius, style: .continuous))
+        // Outer drop shadow — gives the tile a "floating玩具" feel
+        .shadow(
+            color: tileShadowColor,
+            radius: tileShadowRadius,
+            x: 0,
+            y: tileShadowYOffset
+        )
         .scaleEffect(isPressed ? 0.96 : 1.0)
         .animation(.easeOut(duration: 0.1), value: isPressed)
         .contentShape(Rectangle())
@@ -150,9 +205,94 @@ private struct CalendarDayCellView: View {
         .accessibilityIdentifier(dayIdentifier)
     }
 
+    // MARK: - Original-style badge pills (restored)
+
+    private func badgeView(_ indicator: BadgeIndicator) -> some View {
+        Text(indicator.text)
+            .font(.system(size: 8, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.96))
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .background {
+                Capsule().fill(indicator.fill)
+            }
+            .overlay {
+                Capsule().strokeBorder(indicator.fill.opacity(colorScheme == .dark ? 0.55 : 0.2), lineWidth: 0.5)
+            }
+            .shadow(color: indicator.shadow, radius: colorScheme == .dark ? 6 : 0, y: 1)
+    }
+
+    private var todayBadgeView: some View {
+        Text(L("Today"))
+            .font(.system(size: 8, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.96))
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .background {
+                Capsule().fill(
+                    colorScheme == .dark
+                        ? Color(red: 0.9, green: 0.75, blue: 0.25)
+                        : Color(red: 0.95, green: 0.6, blue: 0.1)
+                )
+            }
+            .overlay {
+                Capsule().strokeBorder(Color.orange.opacity(colorScheme == .dark ? 0.55 : 0.2), lineWidth: 0.5)
+            }
+            .shadow(color: Color.orange.opacity(colorScheme == .dark ? 0.28 : 0), radius: colorScheme == .dark ? 6 : 0, y: 1)
+    }
+
+    private var badgeIndicator: BadgeIndicator? {
+        guard let badge = day.badges.first else { return nil }
+        switch badge.kind {
+        case .publicHoliday, .statutoryHoliday:
+            return BadgeIndicator(
+                text: L("OFF"),
+                fill: colorScheme == .dark ? Color(red: 0.86, green: 0.25, blue: 0.30) : Color.red.opacity(0.88),
+                shadow: Color.red.opacity(colorScheme == .dark ? 0.28 : 0)
+            )
+        case .workingAdjustmentDay:
+            guard LocaleFeatureAvailability.showWorkingAdjustmentDay else { return nil }
+            return BadgeIndicator(
+                text: L("WRK"),
+                fill: colorScheme == .dark ? Color(red: 0.17, green: 0.50, blue: 0.94) : Color.blue.opacity(0.88),
+                shadow: Color.blue.opacity(colorScheme == .dark ? 0.26 : 0)
+            )
+        case .festival:
+            return nil
+        }
+    }
+
+    // MARK: - Tile Depth Tokens (玩具感)
+
+    private var glossOpacity: Double {
+        // Bigger gloss on highlighted tiles (today/selected) so they pop
+        if day.isToday { return colorScheme == .dark ? 0.18 : 0.40 }
+        if day.isSelected { return colorScheme == .dark ? 0.14 : 0.30 }
+        if semanticStyle != nil { return colorScheme == .dark ? 0.12 : 0.22 }
+        return colorScheme == .dark ? 0.06 : 0.14
+    }
+
+    private var tileShadowColor: Color {
+        if isHighlighted {
+            return glowColor
+        }
+        // Resting tiles get a faint dark drop shadow — gives "floating" feel
+        return Color.black.opacity(colorScheme == .dark ? 0.45 : 0.10)
+    }
+
+    private var tileShadowRadius: CGFloat {
+        if isHighlighted { return 6 }
+        return semanticStyle != nil ? 2 : 1.5
+    }
+
+    private var tileShadowYOffset: CGFloat {
+        isHighlighted ? 0 : 1
+    }
+
     // MARK: - MeeGo Gradient Background
 
     /// Compute the base fill color for the current cell state (today / selected / holiday / normal).
+    /// Even "normal" cells get a faint base so the gradient + gloss read as a 3D tile.
     private var cellBaseColor: Color {
         if day.isToday {
             // Today: yellow tile per lucky-toolkit token
@@ -164,68 +304,51 @@ private struct CalendarDayCellView: View {
         if day.isSelected {
             // Selected: indigo/violet tile
             return colorScheme == .dark
-                ? Color(red: 0.549, green: 0.627, blue: 1.0).opacity(0.30)   // rgba(140,160,255,0.30)
-                : Color(red: 0.471, green: 0.549, blue: 1.0).opacity(0.32)   // rgba(120,140,255,0.32)
+                ? Color(red: 0.549, green: 0.627, blue: 1.0).opacity(0.55)
+                : Color(red: 0.471, green: 0.549, blue: 1.0).opacity(0.45)
         }
 
-        return semanticBaseColor ?? .clear
+        if let semantic = semanticBaseColor {
+            return semantic
+        }
+
+        // Normal in-month tile: faint neutral fill so MeeGo gradient + gloss are visible.
+        // Adjacent-month tiles get a flatter, even fainter base so they recede.
+        if day.isInDisplayedMonth {
+            return colorScheme == .dark
+                ? Color(red: 0.78, green: 0.78, blue: 0.82).opacity(0.10)
+                : Color(red: 0.47, green: 0.47, blue: 0.50).opacity(0.10)
+        }
+
+        return colorScheme == .dark
+            ? Color(red: 0.78, green: 0.78, blue: 0.82).opacity(0.04)
+            : Color(red: 0.47, green: 0.47, blue: 0.50).opacity(0.04)
     }
 
-    /// LinearGradient with 5% luminosity drop top→bottom (reversed in dark mode).
+    /// LinearGradient with stronger top→bottom luminosity delta (玩具感 amplification).
+    /// Light mode: top brighter (+8%) → bottom darker (-8%) gives 16% spread.
+    /// Dark mode: top darker (-6%) → bottom brighter (+10%) gives 16% spread (reversed gloss).
     private var cellGradient: LinearGradient {
         let base = cellBaseColor
         if colorScheme == .dark {
-            // Dark: bottom brighter (+5% raise)
             return LinearGradient(
-                colors: [base, base.luminanceShift(+0.05)],
+                colors: [
+                    base.luminanceShift(-0.06),
+                    base.luminanceShift(+0.10)
+                ],
                 startPoint: .top,
                 endPoint: .bottom
             )
         } else {
-            // Light: top→bottom 5% drop
             return LinearGradient(
-                colors: [base, base.luminanceShift(-0.05)],
+                colors: [
+                    base.luminanceShift(+0.08),
+                    base.luminanceShift(-0.08)
+                ],
                 startPoint: .top,
                 endPoint: .bottom
             )
         }
-    }
-
-    // MARK: - LED Indicator Dot
-
-    /// Returns the LED dot color based on cell state priority:
-    /// 1. Today's yellow tile → white dot
-    /// 2. publicHoliday / statutoryHoliday → red dot
-    /// 3. workingAdjustmentDay → blue dot
-    /// 4. solarTerm in lunarText → orange dot
-    private var ledIndicatorColor: Color? {
-        if day.isToday {
-            // White dot on today's yellow tile
-            return .white
-        }
-
-        if let badge = day.badges.first {
-            switch badge.kind {
-            case .publicHoliday, .statutoryHoliday:
-                return colorScheme == .dark
-                    ? Color(red: 0.86, green: 0.25, blue: 0.30)
-                    : Color.red.opacity(0.88)
-            case .workingAdjustmentDay:
-                guard LocaleFeatureAvailability.showWorkingAdjustmentDay else { return nil }
-                return colorScheme == .dark
-                    ? Color(red: 0.17, green: 0.50, blue: 0.94)
-                    : Color.blue.opacity(0.88)
-            case .festival:
-                break
-            }
-        }
-
-        // Solar term → orange LED
-        if day.lunarTextSemantic == .solarTerm {
-            return .orange
-        }
-
-        return nil
     }
 
     // MARK: - Highlight States
@@ -287,6 +410,12 @@ private struct CalendarDayCellView: View {
     }
 
     private var solarTextColor: Color {
+        // Today's yellow tile demands a dark deep-amber number for contrast,
+        // regardless of weekend / holiday — must precede other branches.
+        if day.isToday {
+            return Color(red: 0.30, green: 0.18, blue: 0)
+        }
+
         // Weekend highlighting — token: #E04F5F light / #FF6B7A dark
         if highlightWeekends && day.isWeekend && day.isInDisplayedMonth {
             return colorScheme == .dark
@@ -314,6 +443,12 @@ private struct CalendarDayCellView: View {
     }
 
     private var subtitleColor: Color {
+        // Today's yellow tile: deep amber subtitle wins over holiday red,
+        // otherwise the holiday name disappears against the yellow gradient.
+        if day.isToday {
+            return Color(red: 0.45, green: 0.20, blue: 0).opacity(0.92)
+        }
+
         if let semanticStyle {
             return day.isInDisplayedMonth
                 ? semanticStyle.subtitle
@@ -407,6 +542,12 @@ private struct CalendarDayCellView: View {
 private struct SemanticStyle {
     let border: Color
     let subtitle: Color
+}
+
+private struct BadgeIndicator {
+    let text: String
+    let fill: Color
+    let shadow: Color
 }
 
 // MARK: - Color+LuminanceShift (macOS, HSB via NSColor)

@@ -13,8 +13,15 @@ struct MonthCalendarService {
         let monthStart = startOfMonth(for: month)
         let leadingDays = leadingDayCount(for: monthStart)
         let gridStart = calendar.date(byAdding: .day, value: -leadingDays, to: monthStart) ?? monthStart
+        let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)?.count ?? 30
 
-        return (0..<42).compactMap { offset in
+        // Variable rows: cover all in-month days with min 5 rows, max 6.
+        // Most months (≤35 cells) fit in 5; only when leading+days >35 do we need 6.
+        let totalCells = leadingDays + daysInMonth
+        let rows = max(5, Int((Double(totalCells) / 7.0).rounded(.up)))
+        let cellCount = rows * 7
+
+        return (0..<cellCount).compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: offset, to: gridStart) else {
                 return nil
             }
