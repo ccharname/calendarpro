@@ -270,7 +270,7 @@ struct RootPopoverView: View {
         let expectedLocation = preferredWeatherLocation
         if weatherService.manualLocation != expectedLocation {
             weatherTask?.cancel()
-            weatherService = WeatherService(manualLocation: expectedLocation)
+            weatherService.updateLocation(expectedLocation)
         }
 
         weatherTask?.cancel()

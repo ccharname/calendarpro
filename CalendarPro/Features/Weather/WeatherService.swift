@@ -176,7 +176,7 @@ struct WeatherService: Sendable {
     let session: URLSession
     let now: @Sendable () -> Date
     let refreshInterval: TimeInterval
-    let manualLocation: WeatherLocation?
+    private(set) var manualLocation: WeatherLocation?
 
     private let cachedLocation = LockedValue<LocationMetadata?>(nil)
     private let cachedSnapshot = LockedValue<WeatherSnapshot?>(nil)
@@ -192,6 +192,16 @@ struct WeatherService: Sendable {
         self.now = now
         self.refreshInterval = refreshInterval
         self.manualLocation = manualLocation
+    }
+
+    /// Update the manual location without recreating the service or its URLSession.
+    /// Clears the cached snapshot so the next fetch re-fetches for the new location.
+    mutating func updateLocation(_ location: WeatherLocation?) {
+        manualLocation = location
+        cachedSnapshot.value = nil
+        cachedLocation.value = nil
+        inFlightSnapshotTask.value?.cancel()
+        inFlightSnapshotTask.value = nil
     }
 
     func fetchCurrentWeather() async -> WeatherDescriptor {
