@@ -41,6 +41,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         Task {
             await refreshHolidayFeedIfNeeded()
         }
+
+        // Pre-warm lunar + holiday caches in the background so the first menu-bar
+        // popover open finds warm caches instead of cold-computing 42 days inline.
+        Task.detached(priority: .utility) { [settingsStore] in
+            await Self.prewarmCalendarCaches(preferences: settingsStore.menuBarPreferences)
+        }
+    }
+
+    /// Compute lunar + holiday lookups for current month ± 1 month off the main thread.
+    /// Single-flight: even if the user opens the popover before this finishes, the SwiftUI
+    /// path will hit a partially-warm cache and only compute the misses.
+    private static func prewarmCalendarCaches(preferences: MenuBarPreferences) async {
+        let calendar = Calendar.autoupdatingCurrent
+        let now = Date()
+        guard let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) else { return }
+
+        let lunar = LunarService()
+        let resolver = HolidayResolver(calendar: calendar)
+
+        // Cover prev / current / next month — that's most of the user's likely first-month nav.
+        for offset in -1...1 {
+            guard let anchor = calendar.date(byAdding: .month, value: offset, to: monthStart) else { continue }
+            guard let range = calendar.range(of: .day, in: .month, for: anchor),
+                  let firstDay = calendar.date(from: calendar.dateComponents([.year, .month], from: anchor)) else { continue }
+
+            var dates: [Date] = []
+            dates.reserveCapacity(range.count)
+            for day in 0..<range.count {
+                if let d = calendar.date(byAdding: .day, value: day, to: firstDay) {
+                    dates.append(d)
+                    _ = lunar.describe(date: d, timeZone: calendar.timeZone)
+                }
+            }
+
+            _ = try? resolver.holidaysByDay(
+                for: dates,
+                activeRegionIDs: preferences.activeRegionIDs,
+                enabledHolidaySetIDs: preferences.enabledHolidayIDs
+            )
+        }
     }
 
     @objc func openSettings() {
