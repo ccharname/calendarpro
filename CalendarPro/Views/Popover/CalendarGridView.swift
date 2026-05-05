@@ -9,8 +9,8 @@ struct CalendarGridView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(spacing: 6) {
-            LazyVGrid(columns: gridColumns, spacing: 6) {
+        Grid(horizontalSpacing: 6, verticalSpacing: 6) {
+            GridRow {
                 ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { index, symbol in
                     Text(symbol)
                         .font(.system(size: 12, weight: .medium, design: .rounded))
@@ -19,12 +19,17 @@ struct CalendarGridView: View {
                 }
             }
 
-            LazyVGrid(columns: gridColumns, spacing: 6) {
-                ForEach(monthDays) { day in
-                    CalendarDayCellView(day: day, highlightWeekends: highlightWeekends)
-                        .onTapGesture {
-                            onSelectDate(day.date)
+            ForEach(0..<6, id: \.self) { rowIndex in
+                GridRow {
+                    ForEach(0..<7, id: \.self) { colIndex in
+                        let dayIndex = rowIndex * 7 + colIndex
+                        if dayIndex < monthDays.count {
+                            CalendarDayCellView(day: monthDays[dayIndex], highlightWeekends: highlightWeekends)
+                                .onTapGesture { onSelectDate(monthDays[dayIndex].date) }
+                        } else {
+                            Color.clear.frame(maxWidth: .infinity)
                         }
+                    }
                 }
             }
         }
@@ -37,9 +42,6 @@ struct CalendarGridView: View {
             : Color(red: 0.85, green: 0.35, blue: 0.35)
     }
 
-    private var gridColumns: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
-    }
 }
 
 private struct CalendarDayCellView: View {
@@ -67,8 +69,6 @@ private struct CalendarDayCellView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity, minHeight: 34)
-        .padding(.vertical, 2)
         .frame(maxWidth: .infinity, minHeight: 34)
         .padding(.vertical, 2)
         .padding(.horizontal, 4)
