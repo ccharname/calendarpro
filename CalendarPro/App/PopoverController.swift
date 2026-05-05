@@ -124,7 +124,10 @@ final class PopoverController: NSObject, NSPopoverDelegate {
         super.init()
 
         popover.behavior = .transient
-        popover.animates = true
+        // Disable AppKit's slide-down animation — it's the perceptible delay
+        // between the menu-bar click and the popover being usable. Instant
+        // appearance feels notably snappier on a high-frequency tool like this.
+        popover.animates = false
         popover.contentSize = NSSize(width: 340, height: 400)
         popover.delegate = self
         updateContentView()
