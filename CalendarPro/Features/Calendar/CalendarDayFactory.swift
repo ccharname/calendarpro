@@ -40,8 +40,7 @@ struct CalendarDayFactory {
             solarText: String(calendar.component(.day, from: date)),
             lunarText: lunarDescriptor.displayText(style: lunarDisplayStyle(from: preferences)),
             lunarTextSemantic: lunarDescriptor.displaySemantic,
-            badges: holidays.map(\.dayBadge),
-            eventCount: nil
+            badges: holidays.map(\.dayBadge)
         )
     }
 
@@ -71,8 +70,7 @@ struct CalendarDayFactory {
                 solarText: day.solarText,
                 lunarText: lunarDescriptor.displayText(style: lunarDisplayStyle(from: preferences)),
                 lunarTextSemantic: lunarDescriptor.displaySemantic,
-                badges: resolvedBadges,
-                eventCount: nil
+                badges: resolvedBadges
             )
         }
     }

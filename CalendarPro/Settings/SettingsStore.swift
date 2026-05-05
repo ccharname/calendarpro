@@ -239,13 +239,6 @@ final class SettingsStore: ObservableObject {
         persistMenuBarPreferences()
     }
 
-    func setShowDayEventDots(_ enabled: Bool) {
-        var prefs = menuBarPreferences
-        prefs.showDayEventDots = enabled
-        menuBarPreferences = prefs
-        persistMenuBarPreferences()
-    }
-
     func setShowAlmanac(_ enabled: Bool) {
         var prefs = menuBarPreferences
         prefs.showAlmanac = enabled

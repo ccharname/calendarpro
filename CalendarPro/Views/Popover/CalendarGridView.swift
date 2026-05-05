@@ -5,7 +5,6 @@ struct CalendarGridView: View {
     let monthDays: [CalendarDay]
     let highlightWeekends: Bool
     let weekendIndices: Set<Int>
-    let showDayEventDots: Bool
     let onSelectDate: (Date) -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -35,8 +34,7 @@ struct CalendarGridView: View {
                         if dayIndex < monthDays.count {
                             CalendarDayCellView(
                                 day: monthDays[dayIndex],
-                                highlightWeekends: highlightWeekends,
-                                showDayEventDots: showDayEventDots
+                                highlightWeekends: highlightWeekends
                             )
                             .onTapGesture { onSelectDate(monthDays[dayIndex].date) }
                         } else {
@@ -95,7 +93,6 @@ private struct CalendarDayCellView: View {
 
     let day: CalendarDay
     let highlightWeekends: Bool
-    let showDayEventDots: Bool
 
     var body: some View {
         ZStack {
@@ -139,7 +136,7 @@ private struct CalendarDayCellView: View {
             // 5. Content (day number + subtitle + optional event dots)
             VStack(spacing: 2) {
                 Text(day.solarText)
-                    .font(.system(size: 13, weight: day.isToday ? .semibold : .regular, design: .rounded))
+                    .font(.system(size: 16, weight: day.isToday ? .semibold : .medium, design: .rounded))
                     .foregroundStyle(solarTextColor)
 
                 let subtitleText: String? = {
@@ -149,20 +146,10 @@ private struct CalendarDayCellView: View {
                     return day.badges.first?.text ?? day.lunarText
                 }()
                 Text(subtitleText ?? "")
-                    .font(.system(size: 9, weight: .regular, design: .rounded))
+                    .font(.system(size: 8, weight: .regular, design: .rounded))
                     .foregroundStyle(subtitleColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-
-                if showDayEventDots, let count = day.eventCount, count > 0 {
-                    HStack(spacing: 2) {
-                        ForEach(0..<min(count, 3), id: \.self) { _ in
-                            Circle()
-                                .fill(Color.secondary.opacity(0.55))
-                                .frame(width: 2, height: 2)
-                        }
-                    }
-                }
             }
             .frame(maxWidth: .infinity, minHeight: 34)
             .padding(.vertical, 2)

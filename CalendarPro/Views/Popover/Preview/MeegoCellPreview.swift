@@ -24,8 +24,7 @@ private func makeDay(
         solarText: solarText,
         lunarText: lunarText,
         lunarTextSemantic: lunarTextSemantic,
-        badges: badges,
-        eventCount: nil
+        badges: badges
     )
 }
 
@@ -88,7 +87,6 @@ struct MeegoCellPreviewProvider: PreviewProvider {
                 monthDays: [day],
                 highlightWeekends: true,
                 weekendIndices: [0, 6],
-                showDayEventDots: false,
                 onSelectDate: { _ in }
             )
             .frame(width: 60, height: 60)

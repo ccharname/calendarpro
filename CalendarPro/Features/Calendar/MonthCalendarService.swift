@@ -36,8 +36,7 @@ struct MonthCalendarService {
                 solarText: String(calendar.component(.day, from: date)),
                 lunarText: nil,
                 lunarTextSemantic: .regular,
-                badges: [],
-                eventCount: nil
+                badges: []
             )
         }
     }

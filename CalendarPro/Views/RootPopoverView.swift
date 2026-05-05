@@ -69,7 +69,6 @@ struct RootPopoverView: View {
             weekendIndices: Self.weekendColumnIndices(for: displayCalendar),
             monthDays: gridCache.days,
             highlightWeekends: settingsStore.menuBarPreferences.highlightWeekends,
-            showDayEventDots: settingsStore.menuBarPreferences.showDayEventDots,
             showEvents: settingsStore.menuBarPreferences.showEvents,
             emptyStateText: settingsStore.menuBarPreferences.eventListEmptyStateText,
             selectedDate: viewModel.selectedDate,

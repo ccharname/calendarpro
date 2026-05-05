@@ -69,15 +69,6 @@ struct GeneralSettingsView: View {
                             .labelsHidden()
                     }
 
-                    Divider()
-
-                    GeneralSettingsRow(
-                        title: L("Show Day Event Dots"),
-                        description: L("Show Day Event Dots Description")
-                    ) {
-                        Toggle("", isOn: showDayEventDotsBinding)
-                            .labelsHidden()
-                    }
                 }
 
                 if LocaleFeatureAvailability.showAlmanacFeatures {
@@ -139,13 +130,6 @@ struct GeneralSettingsView: View {
         Binding(
             get: { store.menuBarPreferences.highlightWeekends },
             set: { store.setHighlightWeekends($0) }
-        )
-    }
-
-    private var showDayEventDotsBinding: Binding<Bool> {
-        Binding(
-            get: { store.menuBarPreferences.showDayEventDots },
-            set: { store.setShowDayEventDots($0) }
         )
     }
 
