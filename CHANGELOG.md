@@ -5,82 +5,69 @@ All notable changes to CalendarPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0-beta.2] - 2026-05-06
+## [0.2.0-beta.3] - 2026-05-06
+
+First fork release from `ccharname/calendarpro`. Forked from `yelog/calendar-pro` at v0.1.4-beta.1 (`318493a`). Three themes: Nokia/MeeGo-style calendar UI, render-path performance overhaul, and a redesigned events/reminders panel.
 
 ### Added
 
-- priority indicators before reminder titles (!/!!/!!! in red; single ! in grey for low)
-- overdue reminder treatment: red time text, red 2pt left-edge accent strip, sorted to top of list
-- right-click context menu on reminder cards (Toggle Completion, Delete; postpone deferred)
+- **MeeGo-style calendar cells**: 12pt continuous squircle (≈35% of short side, N9/Harmattan iconography), 16% top-to-bottom luminosity gradient, glossy top-half overlay, 1px inner highlight rim, outer drop shadow on resting tiles, colored glow on highlight states (today / selected / hovered)
+- **Today / holiday / workday / solar-term capsule pills** in the cell top-trailing corner, single-pill priority when today and holiday collide
+- **Week-number gutter** on the calendar grid (ISO 8601 week-of-year, derived from each row's middle day so the digit is stable regardless of weekStart preference)
+- **Variable month grid rows** (5 or 6) — months that fit in 5 rows no longer waste a row of next-month overflow
+- **Today and overdue typography**: deep-amber day number and subtitle on the yellow tile for contrast; weekend day numbers in `#E04F5F` (light) / `#FF6B7A` (dark)
+- **Events/reminders panel redesign**: 56pt min-height cards with uniform 12pt H / 8pt V padding, 14pt continuous squircle, top row [reminder-checkbox or color-dot · priority · title · metadata icons], bottom info row [calendar · location or end-time or `Overdue`]
+- **Reminder context menu** (right-click): Toggle Completion, Delete
+- **Priority indicators** (`!`, `!!`, `!!!` in red; single `!` in grey for low) inline before reminder titles
+- **Overdue reminder treatment**: red time label, red 2pt leading accent strip, full opacity (overdue must pop, not fade), sorted to top of the list
+- **Past / ongoing / future event states**: past completed at 0.5 opacity with `controlBackgroundColor × 0.6` tint and strikethrough, past events at 0.55 opacity, ongoing carries a 3pt accent-color stripe plus a soft 4pt accent glow
+- **Now-marker** with subtle pill background (matching unfinished card background) on the timeline rail; aligned baseline with the gray hour labels above and below it
+- `MonthGridCache` keyed on `(displayedMonth, selectedDate, weekStart, activeRegionIDs, enabledHolidayIDs, lunarTokenStyle, todayStartOfDay)` — no per-render rebuild of `CalendarDayFactory`
+- `DateFormatters` infrastructure pooling instances behind a single API; ad-hoc `DateFormatter()` allocations cut from 30+ to 8
+- Per-(day, timezone) memoization of `LunarDateDescriptor`; per-(region, year) cache for resolved holiday occurrences (invalidated on remote feed refresh)
+- Background prewarming of lunar + holiday caches at app launch (covers current month ±1) so the first menu-bar click finds warm caches
+- `solarDateKey` integer key on `CalendarDay` for formatter-free accessibility identifiers
+- `selectionNamespace` + `matchedGeometryEffect` so the selected-day highlight slides between cells instead of fading off / on
+- `.drawingGroup()` on the day cell to flatten the 6-layer ZStack into a single GPU-rasterized layer
+- Regression test coverage: `MonthGridCacheTests` (key invalidation), `DateFormattersTests` (instance reuse), `RecurringReminderOccurrenceTests` (B10 lock), `TimeRefreshCoordinatorDayChangeTests` (B11 lock), `MonthGridCacheTests.testSelectedDateChangeReflectedInCellIsSelected` (click → selection regression lock)
+- Design doc `docs/plans/2026-05-05-meego-relaunch-design.md` with full token tables; `MeegoCellPreview.swift` with 8-variant SwiftUI preview
 
 ### Changed
 
-- event card corner radius 10pt → 14pt continuous squircle (cell 12pt + 2pt container hierarchy)
-- now-marker horizontal red line removed — time chip + 4pt red dot alone on the rail column
-- footer Settings/Quit buttons forced to single-line inline HStack layout
-- vacation-guide button demoted to secondary styling; today remains the sole blue accent
-- day-cell number/lunar subtitle spacing 2pt → 3pt
-- checkbox border uses calendar color (opacity 0.85) in incomplete state instead of grey
-- past events fade to 0.55 opacity with tertiary time color; ongoing gets soft accent-color glow
-
-## [0.2.0-beta.1] - 2026-05-05
-
-### Added
-
-- week-number gutter on the calendar grid (ISO 8601, derived from each row's middle day)
-- variable row count (5 or 6) — months that fit in 5 rows no longer show a wasted overflow row
-- background prewarming of lunar + holiday caches at app launch (covers current month ±1)
-- per-(region, year) cache for resolved holiday occurrences, invalidated on remote feed refresh
-- per-(day, timezone) memoization of `LunarDateDescriptor`
-
-### Changed
-
-- MeeGo cell visual: 12pt continuous squircle (~35% × short side, N9/Harmattan-spec aligned), 16% top→bottom gradient, glossy top-half overlay, 1px white inner rim, soft outer drop shadow on resting tiles, colored glow on highlight states
-- restore Today / OFF / WRK text capsule pills (LED-dot variant from beta.0 reverted)
-- when both today and a holiday apply, only the holiday pill renders (yellow tile already signals "today")
-- today's deep-amber day number and subtitle for contrast on the yellow tile
-- day number font 13→16pt; lunar/holiday subtitle 9→8pt
-- popover slide-down animation disabled — instant menu-bar pop
-- `displayCalendar` cached statically (Mon-first / Sun-first), no longer rebuilt on each accessor
+- Replace `LazyVGrid` with static `Grid` / `GridRow` for the calendar grid (non-lazy is appropriate for fixed 6×7 + week-number layout)
+- Day-cell number font 13pt → 16pt (medium / semibold for today); lunar / holiday subtitle 9pt → 8pt
+- Reduce day-number / lunar VStack spacing to 1pt — the 16pt line height already supplies the visual rhythm
+- Drop redundant start time from inside event/reminder cards — left timeline lane already shows it; range events show only the end time as `→ HH:mm`
+- Now-marker time label sits on the rail with the same font/baseline as gray hour labels (red color only)
+- Per-group rail dots removed — the rail is just a 1pt connector line; the time label on the left and the card on the right are sufficient anchors
+- Vacation-guide button demoted to secondary styling so the today button is the sole blue accent
+- Footer Settings/Quit buttons forced to single-line inline `HStack` layout (was vertical Label, halving footer height)
+- Spacing / font / corner-radius tokens snapped to a unified scale (4 / 8 / 12 / 16 / 24 spacing, 8 / 9 / 10 / 11 / 12 / 13 / 16 fonts, 12 / 14 / 16 radius); ~120 ad-hoc magic numbers fixed across 17 files
+- Animation curves upgraded: fast feedback (press / hover / panel) `.easeOut` → `.snappy(0.15s)`; state transitions (completion, opacity, selected) `.easeInOut(0.2s)` → `.spring(response: 0.35, dampingFraction: 0.85)`
+- `WeatherService.manualLocation` mutated via `updateLocation(_:)` instead of full struct reassignment (Swift 6 strict concurrency safety)
+- `displayCalendar` cached statically (Mon-first / Sun-first variants), no longer rebuilt on each accessor
 - `popoverBackground` LinearGradient hoisted to a static constant
+- ScrollView in events panel gets an 8pt trailing inset so the macOS overlay scrollbar no longer overlaps card squircles
+- Popover slide-down animation disabled — instant menu-bar pop
+- Weekday header / lane gutter widths trimmed (timeLabelWidth 50 → 42, railWidth 12 → 10)
+
+### Fixed
+
+- Click on a calendar date now actually switches the events panel to that day. Two regressions: (1) `.onLongPressGesture(minimumDuration: 0.001)` on the cell silently swallowed the parent-level `.onTapGesture`; switched to `.simultaneousGesture(TapGesture())`. (2) `loadEvents` rejected fetched items via strict `Date ==` against `viewModel.selectedDate`; switched to `calendar.isDate(_:inSameDayAs:)`.
+- Today pill placement: badge HStack uses `.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)` so the pill anchors to the cell corner, not collapsing to ZStack center
+- Holiday tile saturation lifted in light mode (`.red.opacity(0.08)` → `0.18`, same for blue) so the red and the today yellow read at comparable strength
+- Week numbers vertically aligned with the day-number row (top-aligned + 7pt offset)
+- Now-marker time label no longer wraps `HH:mm` to two lines on `11:16`-style values (timeLabelWidth tuned + `.fixedSize`)
+- Day cell duplicate `.frame(maxWidth: .infinity, minHeight: 34)` and `.padding(.vertical, 2)` modifiers
+- Reminder checkbox border uses calendar color (opacity 0.85) in incomplete state; completion glyph stays as `checkmark.circle.fill` for Apple-Reminders parity
+- Rail-dot glyph for completed reminder group: was `checkmark.circle.fill` at 10pt with a baseline offset; now removed entirely (rail is dot-free) — moot once dots gone
+- Overdue reminders no longer dim to 0.5 opacity (was a `timelineState == .past` catch-all that defeated the red strip / red time signal)
+- `PopoverController.showPopover` honors `weekStart` preference when syncing day selection on open (was hardcoded to Sunday-first calendar)
 
 ### Removed
 
-- `showDayEventDots` toggle and `MonthEventCountCache` stub (never wired; will return when properly built)
+- `showDayEventDots` toggle and `MonthEventCountCache` stub (was wired into UI but never fetched data — would have misled users)
 - `CalendarDay.eventCount` field
-
-### Fixed
-
-- `PopoverController.showPopover` no longer hardcodes Sunday-first calendar when syncing day selection
-
-## [0.2.0-beta.0] - 2026-05-05
-
-### Added
-
-- cache calendar month grid behind a `MonthGridCache` keyed on display state
-- pool `DateFormatter` instances behind `DateFormatters` infrastructure
-- regression tests for recurring reminder occurrences and cross-day selection sync
-- `solarDateKey` integer key on `CalendarDay` for formatter-free identifiers
-- MeeGo cell restyle: squircle tiles (corner radius 7pt, continuous), top→bottom luminosity gradient, 1px inner highlight stroke, outer glow ring on highlight states
-- LED indicator dots (4pt) replacing OFF/WRK/Today text Capsule pills; red for holidays, blue for adjustment days, orange for solar terms, white on today's yellow tile
-- today tile uses `#FFCF40`/`#FFD75E` yellow token; selected tile uses indigo/violet `rgba(120,140,255,0.32)` token
-- weekend day numbers use `#E04F5F` (light) / `#FF6B7A` (dark) per MeeGo spec
-- tap scale animation (0.96 over 100ms) and hover ring fade-in (120ms)
-- `MenuBarPreferences.showDayEventDots` toggle (default false) with Codable migration
-- `MonthEventCountCache` stub for event-count dot feature (lifecycle wiring deferred)
-- `CalendarDay.eventCount: Int?` field for future event-dot rendering
-- design doc `docs/plans/2026-05-05-meego-relaunch-design.md` with full token tables
-- `MeegoCellPreview.swift` with 8-variant SwiftUI preview (4 states × 2 color schemes)
-
-### Changed
-
-- replace `LazyVGrid` with static `Grid`/`GridRow` for the calendar grid
-- `WeatherService.manualLocation` now mutated via `updateLocation(_:)` instead of full reassignment
-
-### Fixed
-
-- remove duplicate `.frame` and `.padding` modifiers on calendar day cells
-- stabilize weather service ownership for Swift 6 strict concurrency
 
 ## [0.1.4-beta.1] - 2026-04-29
 
