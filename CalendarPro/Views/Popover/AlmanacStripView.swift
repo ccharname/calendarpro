@@ -5,7 +5,7 @@ struct AlmanacStripView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             if !almanac.recommends.isEmpty {
                 almanacRow(
                     label: L("Recommended"),
@@ -22,8 +22,8 @@ struct AlmanacStripView: View {
                 )
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -40,7 +40,7 @@ struct AlmanacStripView: View {
         items: [String],
         style: AlmanacRowStyle
     ) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Text(label)
                 .font(.system(size: 11, weight: .bold, design: .rounded))
                 .foregroundStyle(style.badgeForeground)

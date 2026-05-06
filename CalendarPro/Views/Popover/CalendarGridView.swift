@@ -28,7 +28,7 @@ struct CalendarGridView: View {
                         .font(.system(size: 10, weight: .regular, design: .rounded).monospacedDigit())
                         .foregroundStyle(Color.secondary.opacity(0.55))
                         .frame(width: weekNumberGutterWidth, alignment: .top)
-                        .padding(.top, 7)
+                        .padding(.top, 8)
 
                     ForEach(0..<7, id: \.self) { colIndex in
                         let dayIndex = rowIndex * 7 + colIndex

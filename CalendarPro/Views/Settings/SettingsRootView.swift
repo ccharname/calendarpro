@@ -129,8 +129,8 @@ struct SettingsRootView: View {
                 .foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 22)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 24)
         .frame(width: 248)
         .frame(maxHeight: .infinity, alignment: .topLeading)
         .background(SettingsWindowPalette.windowBackground)
@@ -143,18 +143,18 @@ struct SettingsRootView: View {
 
     private var detailPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(selectedItem.title)
-                    .font(.system(size: 28, weight: .semibold))
+                    .font(.system(size: 24, weight: .semibold))
 
                 Text(selectedItem.detailDescription)
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.horizontal, 30)
-            .padding(.top, 28)
-            .padding(.bottom, 18)
+            .padding(.horizontal, 24)
+            .padding(.top, 24)
+            .padding(.bottom, 16)
 
             Rectangle()
                 .fill(SettingsWindowPalette.separator)
@@ -200,7 +200,7 @@ private struct SettingsSidebarButton: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: item.icon)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                 .frame(width: 30, height: 30)
                 .background(
@@ -214,7 +214,7 @@ private struct SettingsSidebarButton: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.primary)
 
                 Text(item.sidebarDescription)
@@ -226,7 +226,7 @@ private struct SettingsSidebarButton: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 11)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)

@@ -25,7 +25,7 @@ struct EventsSettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 GroupBox(L("Events")) {
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 16) {
                         Toggle(L("Show Events in Panel"), isOn: showEventsBinding)
                             .toggleStyle(.checkbox)
 
@@ -55,7 +55,7 @@ struct EventsSettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            .padding(.horizontal, 30)
+            .padding(.horizontal, 24)
             .padding(.vertical, 24)
         }
     }
@@ -128,7 +128,7 @@ struct EventsSettingsView: View {
     }
 
     private var upcomingIndicatorSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Toggle(L("Show Upcoming Indicator"), isOn: showUpcomingIndicatorBinding)
                 .toggleStyle(.checkbox)
 
@@ -156,7 +156,7 @@ struct EventsSettingsView: View {
     }
 
     private var calendarEventsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Toggle(L("Include Calendar Events"), isOn: showCalendarEventsBinding)
                 .toggleStyle(.checkbox)
 
@@ -209,7 +209,7 @@ struct EventsSettingsView: View {
     }
 
     private var remindersSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Toggle(L("Include Reminders"), isOn: showRemindersBinding)
                 .toggleStyle(.checkbox)
 

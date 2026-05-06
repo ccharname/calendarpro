@@ -100,7 +100,7 @@ struct GeneralSettingsView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 30)
+            .padding(.horizontal, 24)
             .padding(.vertical, 24)
         }
     }
@@ -163,7 +163,7 @@ private struct WeatherLocationSettings: View {
     private let citySearchService = CitySearchService()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             GeneralSettingsRow(
                 title: L("Location Source"),
                 description: L("Location Source Description")
@@ -331,8 +331,8 @@ private struct GeneralSettingsRow<Control: View, Detail: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline, spacing: 18) {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 13, weight: .semibold))
@@ -351,6 +351,6 @@ private struct GeneralSettingsRow<Control: View, Detail: View>: View {
             detail
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.vertical, 16)
     }
 }

@@ -54,14 +54,14 @@ struct EventCardView: View {
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
                         .fill(Color.red)
                         .frame(width: 2)
-                        .padding(.vertical, 6)
-                        .padding(.trailing, 6)
+                        .padding(.vertical, 8)
+                        .padding(.trailing, 8)
                 } else if timelineState == .ongoing {
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
                         .fill(Color(nsColor: item.color))
                         .frame(width: 3)
-                        .padding(.vertical, 6)
-                        .padding(.trailing, 6)
+                        .padding(.vertical, 8)
+                        .padding(.trailing, 8)
                 }
             }
 
@@ -98,7 +98,7 @@ struct EventCardView: View {
 
                     // Metadata icons: right side of the title row
                     if showsDisclosure, !metadataItems.isEmpty {
-                        HStack(spacing: 5) {
+                        HStack(spacing: 4) {
                             ForEach(Array(metadataItems.enumerated()), id: \.offset) { _, metadata in
                                 metadataView(metadata)
                             }
@@ -114,7 +114,7 @@ struct EventCardView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .frame(minHeight: 56, alignment: .top)
         .background(backgroundColor)
@@ -285,7 +285,7 @@ struct EventCardView: View {
             }
         } label: {
             Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 14))
+                .font(.system(size: 13))
                 .foregroundStyle(
                     item.isCompleted
                         ? Color(nsColor: item.color)
@@ -316,7 +316,7 @@ struct EventCardView: View {
         case .participation(let choice):
             EventParticipationStatusBadge(choice: choice, style: .compactIcon)
         case .meeting(let link, let participantCount):
-            HStack(spacing: 5) {
+            HStack(spacing: 4) {
                 MeetingPlatformMark(platform: link.platform, style: .compact)
                     .foregroundStyle(metadataColor)
 

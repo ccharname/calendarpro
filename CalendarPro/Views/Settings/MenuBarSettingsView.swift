@@ -48,7 +48,7 @@ struct MenuBarSettingsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(sortedTokens) { token in
                             if usesCompactLayout {
-                                VStack(alignment: .leading, spacing: 10) {
+                                VStack(alignment: .leading, spacing: 8) {
                                     Toggle(tokenDisplayName(token.token), isOn: enabledBinding(for: token.token))
                                         .toggleStyle(.checkbox)
 
@@ -95,7 +95,7 @@ struct MenuBarSettingsView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 30)
+            .padding(.horizontal, 24)
             .padding(.vertical, 24)
             .background {
                 GeometryReader { proxy in
@@ -152,7 +152,7 @@ struct MenuBarSettingsView: View {
             )
             .overlay(alignment: .leading) {
                 previewImage(for: renderResult)
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 4)
             }
             .frame(minWidth: 160, minHeight: 28, alignment: .leading)
@@ -200,7 +200,7 @@ struct MenuBarSettingsView: View {
     private var fontStyleControls: some View {
         VStack(alignment: .leading, spacing: 12) {
             if usesCompactLayout {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 8) {
                     Toggle(L("Bold"), isOn: boldBinding)
                         .toggleStyle(.checkbox)
 

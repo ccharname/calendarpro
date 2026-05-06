@@ -92,11 +92,11 @@ struct ReminderDetailWindowView: View {
             if let dueDateText {
                 SelectableDetailText(
                     text: dueDateText,
-                    font: .system(size: 14, weight: .semibold, design: .rounded)
+                    font: .system(size: 16, weight: .semibold, design: .rounded)
                 )
             } else {
                 Text(L("No Due Date"))
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(.secondary)
             }
 
@@ -292,13 +292,13 @@ private struct ReminderDetailRow: View {
     var secondaryTruncationMode: Text.TruncationMode = .tail
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -346,13 +346,13 @@ private struct ReminderLinkDetailRow: View {
     let url: URL
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "link")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -397,13 +397,13 @@ private struct ReminderNotesDetailRow: View {
     private let collapsedLineLimit = 4
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "note.text")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -552,10 +552,10 @@ private struct FooterActions: View {
             .padding(.vertical, 8)
             .contentShape(Rectangle())
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color(nsColor: .controlBackgroundColor).opacity(0.6))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .stroke(Color(nsColor: .separatorColor).opacity(0.12), lineWidth: 1)
                     )
             )

@@ -14,8 +14,8 @@ struct WeatherStripView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 if isLoading {
                     loadingSummarySection
                         .layoutPriority(1)
@@ -47,14 +47,14 @@ struct WeatherStripView: View {
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 9)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(backgroundFillColor)
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .strokeBorder(borderColor, lineWidth: 0.5)
         }
         .help(stripHelpText)
@@ -75,9 +75,9 @@ struct WeatherStripView: View {
     }
 
     private var summarySection: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             Image(systemName: weather.iconSystemName)
-                .font(.system(size: 17))
+                .font(.system(size: 16))
                 .foregroundStyle(iconColor)
                 .frame(width: 32, height: 32)
                 .background {
@@ -115,9 +115,9 @@ struct WeatherStripView: View {
     }
 
     private var loadingSummarySection: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             Image(systemName: "cloud")
-                .font(.system(size: 15))
+                .font(.system(size: 13))
                 .foregroundStyle(iconColor)
                 .frame(width: 26, height: 26)
                 .background {
@@ -543,7 +543,7 @@ struct WeatherStripView: View {
     }
 
     private var expandedMetricsSection: some View {
-        LazyVGrid(columns: expandedMetricColumns, alignment: .leading, spacing: 10) {
+        LazyVGrid(columns: expandedMetricColumns, alignment: .leading, spacing: 8) {
             ForEach(fullMetricItems) { item in
                 WeatherExpandedMetricView(item: item, labelColor: bodySecondaryColor)
             }
@@ -572,7 +572,7 @@ private struct WeatherExpandedMetricView: View {
     let labelColor: Color
 
     var body: some View {
-        HStack(alignment: .center, spacing: 7) {
+        HStack(alignment: .center, spacing: 8) {
             Image(systemName: item.systemImage)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(labelColor)
@@ -612,7 +612,7 @@ private struct WeatherMetricView: View {
     let labelColor: Color
 
     var body: some View {
-        HStack(alignment: .center, spacing: 5) {
+        HStack(alignment: .center, spacing: 4) {
             Image(systemName: item.systemImage)
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(labelColor)

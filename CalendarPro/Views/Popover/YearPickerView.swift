@@ -85,15 +85,15 @@ private struct YearCellView: View {
     var body: some View {
         Button(action: onSelect) {
             Text(String(year))
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular, design: .rounded))
+                .font(.system(size: 16, weight: isSelected ? .semibold : .regular, design: .rounded))
                 .foregroundStyle(textColor)
                 .frame(maxWidth: .infinity, minHeight: 36)
                 .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(cellBackgroundColor)
                 )
                 .overlay {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .strokeBorder(cellBorderColor, lineWidth: cellBorderWidth)
                 }
         }

@@ -36,7 +36,7 @@ struct RegionSettingsView: View {
 
                 ForEach(viewModel.availableRegions) { region in
                     GroupBox(region.displayName) {
-                        VStack(alignment: .leading, spacing: 10) {
+                        VStack(alignment: .leading, spacing: 8) {
                             Toggle(
                                 LF("Enable %@", region.displayName),
                                 isOn: Binding(
@@ -64,7 +64,7 @@ struct RegionSettingsView: View {
                     }
                 }
             }
-            .padding(.horizontal, 30)
+            .padding(.horizontal, 24)
             .padding(.vertical, 24)
         }
     }

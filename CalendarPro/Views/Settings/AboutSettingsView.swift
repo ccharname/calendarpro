@@ -11,20 +11,20 @@ struct AboutSettingsView: View {
                 .padding(.top, 8)
 
             connectSection
-                .padding(.top, 20)
+                .padding(.top, 16)
 
             updateSection
                 .padding(.top, 12)
                 .padding(.bottom, 12)
         }
-        .padding(.horizontal, 30)
+        .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     // MARK: - Brand Header
 
     private var brandHeader: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             if let icon = NSApp.applicationIconImage {
                 Image(nsImage: icon)
                     .resizable()
@@ -64,7 +64,7 @@ struct AboutSettingsView: View {
     // MARK: - Connect Section
 
     private var connectSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(L("Links"))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary.opacity(0.8))
@@ -83,7 +83,7 @@ struct AboutSettingsView: View {
                             .foregroundStyle(.yellow)
 
                         Text(L("Star on GitHub"))
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.primary)
                     }
 
@@ -96,10 +96,10 @@ struct AboutSettingsView: View {
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
                 .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(Color.yellow.opacity(0.06))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .strokeBorder(Color.yellow.opacity(0.25), lineWidth: 1)
                         )
                 )
@@ -124,11 +124,11 @@ struct AboutSettingsView: View {
                 )
             }
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color.primary.opacity(0.03))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
             )
         }
@@ -137,13 +137,13 @@ struct AboutSettingsView: View {
     // MARK: - Update Section
 
     private var updateSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(L("Updates"))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary.opacity(0.8))
                 .tracking(0.5)
 
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 Toggle(L("Check Automatically for Updates"), isOn: $autoCheckUpdates)
                     .font(.system(size: 13))
                     .onChange(of: autoCheckUpdates) {
@@ -201,15 +201,15 @@ struct AboutSettingsView: View {
                     .controlSize(.small)
                     .disabled(isCheckingUpdate)
                 }
-                .padding(.leading, 22)
+                .padding(.leading, 24)
             }
-            .padding(10)
+            .padding(8)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color.primary.opacity(0.03))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
             )
         }
@@ -231,7 +231,7 @@ private struct AboutSocialLinkRow: View {
                 NSWorkspace.shared.open(url)
             }
         } label: {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
@@ -249,7 +249,7 @@ private struct AboutSocialLinkRow: View {
                     .opacity(isHovered ? 1 : 0)
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.vertical, 8)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

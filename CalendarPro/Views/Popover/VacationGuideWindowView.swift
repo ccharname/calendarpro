@@ -82,7 +82,7 @@ struct VacationGuideWindowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             header
 
             if showsAdjustmentWarning {
@@ -122,7 +122,7 @@ struct VacationGuideWindowView: View {
                 yearButton(systemImage: "chevron.left", action: { displayedYear -= 1 })
 
                 Text(verbatim: "\(displayedYear)年")
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .frame(minWidth: 56)
 
                 yearButton(systemImage: "chevron.right", action: { displayedYear += 1 })
@@ -151,7 +151,7 @@ struct VacationGuideWindowView: View {
         case let .message(title, detail):
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
 
                 Text(detail)
                     .font(.system(size: 12, weight: .regular, design: .rounded))
@@ -215,7 +215,7 @@ struct VacationGuideWindowView: View {
                 .font(.system(size: 11, weight: .semibold))
                 .frame(width: 24, height: 24)
                 .background(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color.primary.opacity(0.07))
                 )
         }
@@ -226,11 +226,11 @@ struct VacationGuideWindowView: View {
         Text("当前未启用调休上班日，推荐结果可能不完整。")
             .font(.system(size: 11, weight: .medium, design: .rounded))
             .foregroundStyle(Color.orange)
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 8)
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color.orange.opacity(0.12))
             }
     }

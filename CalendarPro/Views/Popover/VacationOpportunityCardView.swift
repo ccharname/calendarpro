@@ -9,7 +9,7 @@ struct VacationOpportunityCardView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(opportunity.holidayName)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
 
                 Spacer(minLength: 8)
 
@@ -50,8 +50,8 @@ struct VacationOpportunityCardView: View {
                 } label: {
                     Text("定位到月历")
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                 }
                 .buttonStyle(.plain)
                 .background(
@@ -92,11 +92,11 @@ struct VacationOpportunityCardView: View {
         .foregroundStyle(segmentForegroundColor(for: segment.kind))
         .frame(width: 24, height: 36)
         .background {
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(segmentFillColor(for: segment.kind))
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .strokeBorder(segmentBorderColor(for: segment.kind), lineWidth: 0.6)
         }
     }

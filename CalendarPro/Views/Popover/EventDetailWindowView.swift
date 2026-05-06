@@ -160,7 +160,7 @@ struct EventDetailWindowView: View {
                     Circle()
                         .fill(calendarColor.opacity(isCanceled ? 0.45 : 1))
                         .frame(width: 9, height: 9)
-                        .padding(.top, 5)
+                        .padding(.top, 4)
 
                     SelectableDetailText(
                         text: event.title ?? L("Untitled"),
@@ -198,7 +198,7 @@ struct EventDetailWindowView: View {
         VStack(alignment: .leading, spacing: 6) {
             SelectableDetailText(
                 text: dateRangeText,
-                font: .system(size: 14, weight: .semibold, design: .rounded),
+                font: .system(size: 16, weight: .semibold, design: .rounded),
                 foregroundColor: isCanceled ? .secondary : .primary
             )
 
@@ -430,13 +430,13 @@ private struct LinkDetailRow: View {
     let url: URL
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "link")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -478,13 +478,13 @@ private struct AttendeesDetailRow: View {
     private let defaultVisibleCount = 3
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "person.2")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -577,13 +577,13 @@ private struct ParticipationResponseRow: View {
     let onSelect: (EventParticipationChoice) -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "person.crop.circle.badge.checkmark")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -618,13 +618,13 @@ private struct ParticipationResponseRow: View {
 
 private struct ReadOnlyParticipationRow: View {
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "lock")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -672,11 +672,11 @@ private struct ParticipationChoiceButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(isSelected ? selectedBackgroundColor : Color(nsColor: .windowBackgroundColor).opacity(0.6))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .stroke(isSelected ? selectedBorderColor : Color(nsColor: .separatorColor).opacity(0.16), lineWidth: 1)
             )
         }
@@ -733,13 +733,13 @@ private struct NotesDetailRow: View {
     private let collapsedLineLimit = 4
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "note.text")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -926,13 +926,13 @@ private struct EventDetailRow: View {
     var secondaryTruncationMode: Text.TruncationMode = .tail
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color(nsColor: .controlAccentColor).opacity(0.08))
                 )
 
@@ -1025,9 +1025,9 @@ private struct MeetingActionButton: View {
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
+            .padding(.vertical, 8)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(calendarColor)
             )
             .foregroundStyle(.white)
@@ -1095,10 +1095,10 @@ private struct FooterActions: View {
             .padding(.vertical, 8)
             .contentShape(Rectangle())
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color(nsColor: .controlBackgroundColor).opacity(0.6))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .stroke(Color(nsColor: .separatorColor).opacity(0.12), lineWidth: 1)
                     )
             )

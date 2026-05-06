@@ -116,7 +116,7 @@ struct CalendarItemComposerView: View {
     }
 
     private var content: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             if showsKindPicker {
                 Picker(L("Type"), selection: $selectedKind) {
                     ForEach(availableKinds, id: \.self) { kind in
@@ -149,7 +149,7 @@ struct CalendarItemComposerView: View {
                         Text(L("Notes"))
                             .font(.system(size: 12))
                             .foregroundStyle(.tertiary)
-                            .padding(.horizontal, 6)
+                            .padding(.horizontal, 4)
                             .padding(.vertical, 8)
                             .allowsHitTesting(false)
                     }
