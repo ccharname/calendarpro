@@ -5,6 +5,24 @@ All notable changes to CalendarPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-beta.2] - 2026-05-06
+
+### Added
+
+- priority indicators before reminder titles (!/!!/!!! in red; single ! in grey for low)
+- overdue reminder treatment: red time text, red 2pt left-edge accent strip, sorted to top of list
+- right-click context menu on reminder cards (Toggle Completion, Delete; postpone deferred)
+
+### Changed
+
+- event card corner radius 10pt → 14pt continuous squircle (cell 12pt + 2pt container hierarchy)
+- now-marker horizontal red line removed — time chip + 4pt red dot alone on the rail column
+- footer Settings/Quit buttons forced to single-line inline HStack layout
+- vacation-guide button demoted to secondary styling; today remains the sole blue accent
+- day-cell number/lunar subtitle spacing 2pt → 3pt
+- checkbox border uses calendar color (opacity 0.85) in incomplete state instead of grey
+- past events fade to 0.55 opacity with tertiary time color; ongoing gets soft accent-color glow
+
 ## [0.2.0-beta.1] - 2026-05-05
 
 ### Added
