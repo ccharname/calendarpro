@@ -409,22 +409,17 @@ struct EventListView: View {
     }
 
     private var nowMarkerView: some View {
-        HStack(alignment: .center, spacing: Metrics.contentSpacing) {
-            HStack(alignment: .center, spacing: Metrics.laneSpacing) {
-                markerTimeChip
-                    .frame(width: Metrics.timeLaneWidth, alignment: .trailing)
+        // Confine the red line to the rail column only — it must not bleed into the card area.
+        HStack(alignment: .center, spacing: Metrics.laneSpacing) {
+            markerTimeChip
+                .frame(width: Metrics.timeLaneWidth, alignment: .trailing)
 
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: Metrics.markerDotSize, height: Metrics.markerDotSize)
-                    .frame(width: Metrics.railLaneWidth)
-            }
-            .frame(width: Metrics.timelineColumnWidth, alignment: .leading)
-
-            Rectangle()
-                .fill(Color.red.opacity(0.7))
-                .frame(height: Metrics.markerConnectorHeight)
+            Circle()
+                .fill(Color.red)
+                .frame(width: Metrics.markerDotSize, height: Metrics.markerDotSize)
+                .frame(width: Metrics.railLaneWidth)
         }
+        .frame(width: Metrics.timelineColumnWidth, alignment: .leading)
         .padding(.vertical, 2)
     }
 
@@ -454,7 +449,8 @@ struct EventListView: View {
                     item: item,
                     isSelected: selectedEventIdentifier == event.selectionIdentifier,
                     showsDisclosure: true,
-                    timelineState: timelineState
+                    timelineState: timelineState,
+                    now: currentTime
                 )
             }
             .buttonStyle(.plain)
@@ -470,7 +466,8 @@ struct EventListView: View {
                     isSelected: selectedEventIdentifier == CalendarItem.reminder(reminder).selectionIdentifier,
                     showsDisclosure: true,
                     timelineState: timelineState,
-                    onToggleReminder: onToggleReminder
+                    onToggleReminder: onToggleReminder,
+                    now: currentTime
                 )
             }
             .buttonStyle(.plain)
@@ -550,8 +547,6 @@ struct EventListView: View {
 
     private func withinItemMarkerOverlay(placement: WithinItemMarkerPlacement) -> some View {
         let railCenterX = Metrics.timeLaneWidth + Metrics.laneSpacing + (Metrics.railLaneWidth / 2)
-        let lineEndX = max(railCenterX, placement.frame.maxX - Metrics.markerLineTrailingInset)
-        let connectorWidth = max(0, lineEndX - railCenterX)
 
         return ZStack(alignment: .topLeading) {
             markerTimeChip
@@ -565,16 +560,6 @@ struct EventListView: View {
                     x: railCenterX - (Metrics.markerDotSize / 2),
                     y: placement.y - (Metrics.markerDotSize / 2)
                 )
-
-            if connectorWidth > 0 {
-                Rectangle()
-                    .fill(Color.red.opacity(0.7))
-                    .frame(width: connectorWidth, height: Metrics.markerConnectorHeight)
-                    .offset(
-                        x: railCenterX,
-                        y: placement.y
-                    )
-            }
         }
         .allowsHitTesting(false)
     }

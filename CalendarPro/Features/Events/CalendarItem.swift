@@ -466,6 +466,19 @@ enum CalendarItem: Identifiable {
         return reminder.recurrenceSummary(style: .compact)
     }
 
+    /// Apple-Reminders-style priority indicator. 0 = none, 1 = high, 5 = medium, 9 = low.
+    var reminderPriority: Int? {
+        guard case .reminder(let r) = self else { return nil }
+        return Int(r.priority)
+    }
+
+    /// True when this is an unfinished reminder whose due date has already passed.
+    func isOverdue(now: Date) -> Bool {
+        guard case .reminder(let r) = self, !r.isCompleted else { return false }
+        guard let due = timelineDate else { return false }
+        return due < now
+    }
+
     func timelinePlacement(using calendar: Calendar = .autoupdatingCurrent) -> CalendarItemTimelinePlacement {
         if isAllDay {
             return .allDay

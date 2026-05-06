@@ -278,12 +278,18 @@ final class EventService: ObservableObject {
             items.append(contentsOf: reminders.map { .reminder($0) })
         }
 
+        let now = Date()
         let cal = Calendar.current
         return items.sorted { item1, item2 in
             // All-day items come first
             if item1.isAllDay != item2.isAllDay {
                 return item1.isAllDay
             }
+
+            // Overdue reminders bubble to the top (tier 0), everything else is tier 1
+            let overdue1 = item1.isOverdue(now: now) ? 0 : 1
+            let overdue2 = item2.isOverdue(now: now) ? 0 : 1
+            if overdue1 != overdue2 { return overdue1 < overdue2 }
 
             guard let date1 = item1.startDate, let date2 = item2.startDate else {
                 return item1.startDate != nil

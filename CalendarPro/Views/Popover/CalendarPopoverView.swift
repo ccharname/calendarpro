@@ -137,9 +137,11 @@ struct CalendarPopoverView: View {
             Button {
                 NSApp.sendAction(#selector(AppDelegate.openSettings), to: nil, from: nil)
             } label: {
-                Label(L("Settings"), systemImage: "gearshape")
-                    .font(.system(size: 12))
-                    .contentShape(Rectangle())
+                HStack(spacing: 4) {
+                    Image(systemName: "gearshape").font(.system(size: 12))
+                    Text(L("Settings")).font(.system(size: 12))
+                }
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .keyboardShortcut(",", modifiers: .command)
@@ -147,9 +149,11 @@ struct CalendarPopoverView: View {
             Spacer()
 
             Button(action: onQuit) {
-                Label(L("Quit"), systemImage: "power")
-                    .font(.system(size: 12))
-                    .contentShape(Rectangle())
+                HStack(spacing: 4) {
+                    Image(systemName: "power").font(.system(size: 12))
+                    Text(L("Quit")).font(.system(size: 12))
+                }
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
         }

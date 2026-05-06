@@ -19,13 +19,23 @@ struct EventCardView: View {
     let showsDisclosure: Bool
     let timelineState: EventCardTimelineState
     var onToggleReminder: ((EKReminder) -> Void)?
+    /// Current time used for overdue calculations. Defaults to `Date()` for previews.
+    var now: Date
 
-    init(item: CalendarItem, isSelected: Bool = false, showsDisclosure: Bool = true, timelineState: EventCardTimelineState = .regular, onToggleReminder: ((EKReminder) -> Void)? = nil) {
+    init(
+        item: CalendarItem,
+        isSelected: Bool = false,
+        showsDisclosure: Bool = true,
+        timelineState: EventCardTimelineState = .regular,
+        onToggleReminder: ((EKReminder) -> Void)? = nil,
+        now: Date = Date()
+    ) {
         self.item = item
         self.isSelected = isSelected
         self.showsDisclosure = showsDisclosure
         self.timelineState = timelineState
         self.onToggleReminder = onToggleReminder
+        self.now = now
     }
 
     init(event: EKEvent, isSelected: Bool) {
@@ -34,7 +44,13 @@ struct EventCardView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            if timelineState == .ongoing && !item.isCanceled {
+            // Overdue left-edge accent (2pt red strip) — shown before the ongoing stripe
+            if item.isOverdue(now: now), !item.isCanceled {
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(Color.red)
+                    .frame(width: 2)
+                    .padding(.vertical, 2)
+            } else if timelineState == .ongoing && !item.isCanceled {
                 RoundedRectangle(cornerRadius: 2, style: .continuous)
                     .fill(Color(nsColor: item.color))
                     .frame(width: 3)
@@ -70,12 +86,22 @@ struct EventCardView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text(item.title)
-                    .font(.system(size: 13, weight: .regular))
-                    .lineLimit(2)
-                    .strikethrough(item.isCompleted || item.isCanceled)
-                    .foregroundStyle(titleColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                // Priority indicator prefix + title, composed as HStack to preserve strikethrough
+                HStack(alignment: .top, spacing: 4) {
+                    if let priority = item.reminderPriority, priority > 0 {
+                        Text(priorityExclamationText(priority))
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(priorityColor(priority))
+                            .fixedSize()
+                    }
+
+                    Text(item.title)
+                        .font(.system(size: 13, weight: .regular))
+                        .lineLimit(2)
+                        .strikethrough(item.isCompleted || item.isCanceled)
+                        .foregroundStyle(titleColor)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
                 if let secondaryText {
                     Text(secondaryText)
@@ -91,14 +117,14 @@ struct EventCardView: View {
         .padding(.vertical, 8)
         .background(backgroundColor)
         .overlay {
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .strokeBorder(borderColor, lineWidth: 1)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .contentShape(RoundedRectangle(cornerRadius: 10))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .opacity(contentOpacity)
     }
-    
+
     private var timeRangeText: String {
         if item.isAllDay {
             return L("All Day")
@@ -165,7 +191,9 @@ struct EventCardView: View {
     }
 
     private var timeTextColor: Color {
-        item.isCanceled ? Color(nsColor: .tertiaryLabelColor) : .secondary
+        if item.isCanceled { return Color(nsColor: .tertiaryLabelColor) }
+        if item.isOverdue(now: now) { return .red }
+        return .secondary
     }
 
     private var titleColor: Color {
@@ -224,9 +252,28 @@ struct EventCardView: View {
         } label: {
             Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.system(size: 14))
-                .foregroundStyle(item.isCompleted ? Color(nsColor: item.color) : .secondary)
+                .foregroundStyle(
+                    item.isCompleted
+                        ? Color(nsColor: item.color)
+                        : Color(nsColor: item.color).opacity(0.85)
+                )
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Priority helpers
+
+    private func priorityExclamationText(_ priority: Int) -> String {
+        switch priority {
+        case 1:  return "!!!"
+        case 5:  return "!!"
+        case 9:  return "!"
+        default: return ""
+        }
+    }
+
+    private func priorityColor(_ priority: Int) -> Color {
+        priority == 9 ? .secondary : .red
     }
 
     @ViewBuilder
