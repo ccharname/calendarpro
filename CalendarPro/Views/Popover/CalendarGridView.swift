@@ -7,6 +7,7 @@ struct CalendarGridView: View {
     let weekendIndices: Set<Int>
     let onSelectDate: (Date) -> Void
     @Environment(\.colorScheme) private var colorScheme
+    @Namespace private var selectionNamespace
 
     var body: some View {
         Grid(horizontalSpacing: 6, verticalSpacing: 6) {
@@ -35,7 +36,8 @@ struct CalendarGridView: View {
                         if dayIndex < monthDays.count {
                             CalendarDayCellView(
                                 day: monthDays[dayIndex],
-                                highlightWeekends: highlightWeekends
+                                highlightWeekends: highlightWeekends,
+                                selectionNamespace: selectionNamespace
                             )
                             // Use simultaneousGesture so the tap fires alongside the cell's
                             // onLongPressGesture (which drives the press-animation). Without
@@ -99,6 +101,7 @@ private struct CalendarDayCellView: View {
 
     let day: CalendarDay
     let highlightWeekends: Bool
+    let selectionNamespace: Namespace.ID
 
     var body: some View {
         ZStack {
@@ -174,7 +177,20 @@ private struct CalendarDayCellView: View {
             .padding(.trailing, -4)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             .allowsHitTesting(false)
+
+            // 7. Geometry anchor for matchedGeometryEffect — carries the selection
+            // frame between cells when selectedDate changes, enabling a physical
+            // slide instead of cross-fade. Color.clear so no visual is double-drawn.
+            if day.isSelected {
+                Color.clear
+                    .matchedGeometryEffect(id: "selectedDay", in: selectionNamespace)
+                    .allowsHitTesting(false)
+            }
         }
+        // drawingGroup flattens layers 1–7 into a single GPU-rasterized layer per
+        // cell, reducing layer commit cost during scroll / hover / selection animation.
+        // Placed BEFORE shadow/scale/gestures so those remain dynamic.
+        .drawingGroup()
         // Outer drop shadow — gives the tile a "floating玩具" feel
         .shadow(
             color: tileShadowColor,
