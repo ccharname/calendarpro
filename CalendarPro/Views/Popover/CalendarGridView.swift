@@ -137,7 +137,7 @@ private struct CalendarDayCellView: View {
             // 4. Outer border (hover/selection state) with fade animation
             RoundedRectangle(cornerRadius: meegoCellCornerRadius, style: .continuous)
                 .strokeBorder(cellBorderColor, lineWidth: cellBorderWidth)
-                .animation(.easeInOut(duration: 0.12), value: isHovered)
+                .animation(.snappy(duration: 0.15), value: isHovered)
 
             // 5. Content (day number + subtitle + optional event dots)
             VStack(spacing: 1) {
@@ -183,7 +183,7 @@ private struct CalendarDayCellView: View {
             y: tileShadowYOffset
         )
         .scaleEffect(isPressed ? 0.96 : 1.0)
-        .animation(.easeOut(duration: 0.1), value: isPressed)
+        .animation(.snappy(duration: 0.15), value: isPressed)
         .contentShape(Rectangle())
         .onHover { hovering in
             isHovered = hovering

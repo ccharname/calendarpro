@@ -254,7 +254,7 @@ private struct AboutSocialLinkRow: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(.snappy(duration: 0.15)) {
                 isHovered = hovering
             }
         }

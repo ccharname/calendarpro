@@ -164,7 +164,7 @@ struct SettingsRootView: View {
                 .id(selectedItem)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .animation(.easeInOut(duration: 0.16), value: selectedItem)
+        .animation(.snappy(duration: 0.15), value: selectedItem)
     }
 
     @ViewBuilder

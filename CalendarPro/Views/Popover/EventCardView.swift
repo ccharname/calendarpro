@@ -94,7 +94,7 @@ struct EventCardView: View {
                         .strikethrough(item.isCompleted || item.isCanceled)
                         .foregroundStyle(titleColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .animation(.easeInOut(duration: 0.2), value: item.isCompleted)
+                        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: item.isCompleted)
 
                     // Metadata icons: right side of the title row
                     if showsDisclosure, !metadataItems.isEmpty {
@@ -125,7 +125,7 @@ struct EventCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .opacity(contentOpacity)
-        .animation(.easeInOut(duration: 0.2), value: item.isCompleted)
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: item.isCompleted)
         .shadow(
             color: ongoingGlowColor,
             radius: 4

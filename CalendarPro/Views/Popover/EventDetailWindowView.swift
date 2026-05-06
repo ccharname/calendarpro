@@ -499,7 +499,7 @@ private struct AttendeesDetailRow: View {
 
                 if attendees.count > defaultVisibleCount {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                             isExpanded.toggle()
                         }
                     } label: {
@@ -813,7 +813,7 @@ private struct NotesDetailRow: View {
 
     private var toggleButton: some View {
         Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 isExpanded.toggle()
             }
         } label: {

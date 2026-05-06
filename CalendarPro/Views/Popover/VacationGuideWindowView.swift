@@ -318,7 +318,7 @@ struct VacationGuideWindowView: View {
         }
 
         try? await Task.sleep(nanoseconds: 50_000_000)
-        withAnimation(.easeInOut(duration: 0.2)) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
             proxy.scrollTo(target.id, anchor: .top)
         }
     }

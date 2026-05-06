@@ -442,7 +442,7 @@ private struct ReminderNotesDetailRow: View {
 
                 if needsCollapse {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                             isExpanded.toggle()
                         }
                     } label: {
