@@ -229,8 +229,9 @@ struct EventListView: View {
     // Design tokens — uniform, locked.
     private enum Metrics {
         /// Fixed width for the HH:mm time label column (right-aligned text).
-        /// HH:mm @ 11pt monospaced = ~28pt; 36pt gives breathing room without inflating the gutter.
-        static let timeLabelWidth: CGFloat = 36
+        /// 42pt accommodates "HH:mm" (5 chars @ 11pt mono) plus the now-marker's
+        /// 6pt horizontal capsule padding without forcing the digits to wrap.
+        static let timeLabelWidth: CGFloat = 42
         /// Rail column (dot + vertical line).
         static let railWidth: CGFloat = 10
         /// Gap between the time-label column and the rail column.
@@ -429,7 +430,8 @@ struct EventListView: View {
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.red)
                 .monospacedDigit()
-                .padding(.horizontal, 4)
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, 3)
                 .padding(.vertical, 1)
                 .background(Color.red.opacity(0.14), in: Capsule(style: .continuous))
                 .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
@@ -598,7 +600,8 @@ struct EventListView: View {
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.red)
                 .monospacedDigit()
-                .padding(.horizontal, 4)
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, 3)
                 .padding(.vertical, 1)
                 .background(Color.red.opacity(0.14), in: Capsule(style: .continuous))
                 .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
