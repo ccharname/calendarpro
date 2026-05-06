@@ -71,23 +71,29 @@ struct EventCardView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack(alignment: .top, spacing: 8) {
-                    Text(timeRangeText)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(timeTextColor)
-
-                    Spacer(minLength: 8)
-
-                    if showsDisclosure, !metadataItems.isEmpty {
-                        HStack(spacing: 5) {
-                            ForEach(Array(metadataItems.enumerated()), id: \.offset) { _, metadata in
-                                metadataView(metadata)
-                            }
+                let hasTimeText = !timeRangeText.isEmpty
+                let hasMetadata = showsDisclosure && !metadataItems.isEmpty
+                if hasTimeText || hasMetadata {
+                    HStack(alignment: .top, spacing: 8) {
+                        if hasTimeText {
+                            Text(timeRangeText)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(timeTextColor)
                         }
-                        .fixedSize(horizontal: true, vertical: false)
+
+                        Spacer(minLength: 8)
+
+                        if hasMetadata {
+                            HStack(spacing: 5) {
+                                ForEach(Array(metadataItems.enumerated()), id: \.offset) { _, metadata in
+                                    metadataView(metadata)
+                                }
+                            }
+                            .fixedSize(horizontal: true, vertical: false)
+                        }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
 
                 // Priority indicator prefix + title, composed as HStack to preserve strikethrough
                 HStack(alignment: .top, spacing: 4) {
@@ -147,20 +153,19 @@ struct EventCardView: View {
             return L("All Day")
         }
 
-        guard let startDate = item.timelineDate else {
+        guard item.timelineDate != nil else {
             return L("No Time")
         }
 
-        let formatter = DateFormatters.shortTime(for: AppLocalization.locale)
-
-        let start = formatter.string(from: startDate)
-
+        // Start time is shown on the left timeline lane — only render in-card when
+        // there's additional info (end time for ranges, or all-day text).
         if let endDate = item.endDate {
-            let end = formatter.string(from: endDate)
-            return "\(start)-\(end)"
+            let formatter = DateFormatters.shortTime(for: AppLocalization.locale)
+            return "→ \(formatter.string(from: endDate))"
         }
 
-        return start
+        // Single-point items (reminders / events without endDate) — lane suffices.
+        return ""
     }
 
     private var backgroundColor: Color {

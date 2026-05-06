@@ -567,15 +567,11 @@ struct EventListView: View {
     }
 
     private var markerTimeChip: some View {
+        // Match the gray hour labels' style — same font, same baseline, only color differs.
+        // No background pill: keeps the left-edge of every time label visually aligned.
         Text(formattedCurrentTime)
             .font(.system(size: 10, weight: .semibold, design: .rounded))
             .foregroundStyle(.red)
             .monospacedDigit()
-            .padding(.horizontal, Metrics.markerChipHorizontalPadding)
-            .frame(height: Metrics.markerChipHeight)
-            .background(
-                Color(nsColor: .windowBackgroundColor).opacity(0.94),
-                in: RoundedRectangle(cornerRadius: Metrics.markerChipCornerRadius, style: .continuous)
-            )
     }
 }
