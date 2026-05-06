@@ -380,42 +380,16 @@ struct EventListView: View {
     // MARK: - Rail column
 
     private func railColumn(for group: EventTimelineGroup, isFirst: Bool) -> some View {
-        ZStack(alignment: .top) {
-            // Vertical connector line
-            Rectangle()
-                .fill(Color(nsColor: .separatorColor).opacity(0.25))
-                .frame(width: 1)
-
-            // Rail dot — 6pt diameter, aligned 6pt from card top
-            railDot(for: group)
-                .padding(.top, 6)
-        }
-        .frame(maxHeight: .infinity)
-    }
-
-    @ViewBuilder
-    private func railDot(for group: EventTimelineGroup) -> some View {
-        let referenceItem = group.items.first(where: { !$0.isReminder }) ?? group.items.first
-        let nodeColor = Color(nsColor: referenceItem?.color ?? .secondaryLabelColor)
-
-        if group.items.allSatisfy(\.isReminder) {
-            if group.items.allSatisfy(\.isCompleted) {
-                // Completed reminder: solid disk — identical bounding box to the
-                // uncompleted ring below, so y-baseline matches the time label.
-                Circle()
-                    .fill(nodeColor)
-                    .frame(width: Metrics.railDotSize, height: Metrics.railDotSize)
-            } else {
-                Circle()
-                    .stroke(nodeColor, lineWidth: 1.6)
-                    .frame(width: Metrics.railDotSize, height: Metrics.railDotSize)
-                    .background(Color(nsColor: .windowBackgroundColor), in: Circle())
-            }
-        } else {
-            Circle()
-                .fill(nodeColor)
-                .frame(width: Metrics.railDotSize, height: Metrics.railDotSize)
-        }
+        // Rail = thin vertical connector line only. Per-group dots removed —
+        // the time label on the left + the card on the right are sufficient
+        // anchors; the dot was visual noise. Wrap the 1pt line in the full
+        // railWidth-sized container so the now-marker overlay's dot still
+        // lands at the same x-coordinate.
+        Rectangle()
+            .fill(Color(nsColor: .separatorColor).opacity(0.25))
+            .frame(width: 1)
+            .frame(width: Metrics.railWidth, alignment: .center)
+            .frame(maxHeight: .infinity)
     }
 
     // MARK: - Now-marker
