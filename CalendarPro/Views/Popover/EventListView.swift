@@ -229,13 +229,17 @@ struct EventListView: View {
     // Design tokens — uniform, locked.
     private enum Metrics {
         /// Fixed width for the HH:mm time label column (right-aligned text).
-        static let timeLabelWidth: CGFloat = 50
+        /// HH:mm @ 11pt monospaced = ~28pt; 36pt gives breathing room without inflating the gutter.
+        static let timeLabelWidth: CGFloat = 36
         /// Rail column (dot + vertical line).
-        static let railWidth: CGFloat = 12
+        static let railWidth: CGFloat = 10
         /// Gap between the time-label column and the rail column.
         static let laneSpacing: CGFloat = 4
         /// Gap between the rail column and the card area.
         static let cardSpacing: CGFloat = 6
+        /// Trailing padding inside the ScrollView so the macOS overlay scrollbar
+        /// doesn't bleed onto the card squircle's right edge.
+        static let scrollbarInset: CGFloat = 8
         /// Total timeline column width consumed before cards start.
         static let timelineColumnWidth: CGFloat = timeLabelWidth + laneSpacing + railWidth + cardSpacing
         /// Dot diameter on the rail aligned to card top.
@@ -278,6 +282,7 @@ struct EventListView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     timelineContent
+                        .padding(.trailing, Metrics.scrollbarInset)
                 }
                 .onAppear {
                     timeRefreshCoordinator.refreshNow()
@@ -417,11 +422,16 @@ struct EventListView: View {
     /// gap from the label trailing edge to the rail centre.
     private var nowMarkerRow: some View {
         HStack(alignment: .center, spacing: 0) {
-            // Red time label — same font/size as gray time labels, only colour differs (no pill).
+            // Red time label with subtle red-tinted pill background so it pops out
+            // from the gray hour labels. Trailing-aligned within timeLabelWidth so
+            // the right edge still lines up with adjacent labels.
             Text(formattedCurrentTime)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.red)
                 .monospacedDigit()
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1)
+                .background(Color.red.opacity(0.14), in: Capsule(style: .continuous))
                 .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
 
             // Thin 1pt red connector line from label edge to dot centre
@@ -583,11 +593,14 @@ struct EventListView: View {
         let dotCenterX = Metrics.timeLabelWidth + Metrics.laneSpacing + (Metrics.railWidth / 2)
 
         return ZStack(alignment: .topLeading) {
-            // Red time label (no pill, matches nowMarkerRow style)
+            // Red time label with subtle red-tinted pill background — matches nowMarkerRow style
             Text(formattedCurrentTime)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.red)
                 .monospacedDigit()
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1)
+                .background(Color.red.opacity(0.14), in: Capsule(style: .continuous))
                 .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
                 .offset(y: placement.y - 7)
 
