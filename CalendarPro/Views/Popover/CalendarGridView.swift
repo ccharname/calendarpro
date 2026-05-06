@@ -37,7 +37,12 @@ struct CalendarGridView: View {
                                 day: monthDays[dayIndex],
                                 highlightWeekends: highlightWeekends
                             )
-                            .onTapGesture { onSelectDate(monthDays[dayIndex].date) }
+                            // Use simultaneousGesture so the tap fires alongside the cell's
+                            // onLongPressGesture (which drives the press-animation). Without
+                            // this, the long press gesture (minimumDuration 0.001 s) completes
+                            // first and causes SwiftUI to cancel the parent-level tap, meaning
+                            // date selection silently never fires.
+                            .simultaneousGesture(TapGesture().onEnded { onSelectDate(monthDays[dayIndex].date) })
                         } else {
                             Color.clear.frame(maxWidth: .infinity)
                         }

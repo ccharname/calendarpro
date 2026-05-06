@@ -343,6 +343,7 @@ struct RootPopoverView: View {
 
         isLoadingEvents = true
         let requestedDate = date
+        let fetchCalendar = displayCalendar
         Task {
             let items = await eventService.fetchCalendarItems(
                 for: date,
@@ -352,7 +353,12 @@ struct RootPopoverView: View {
                 showReminders: preferences.showReminders
             )
             await MainActor.run {
-                guard viewModel.selectedDate == requestedDate else { return }
+                // Use calendar-day equality instead of exact Date comparison so that
+                // a selectedDate set to the current wall-clock time (mid-day) on initial
+                // launch still passes when the async fetch completes against a midnight
+                // grid-date for the same calendar day.
+                guard let current = viewModel.selectedDate,
+                      fetchCalendar.isDate(current, inSameDayAs: requestedDate) else { return }
                 itemsForSelectedDate = items
                 syncSelectedEvent(with: items)
                 isLoadingEvents = false
