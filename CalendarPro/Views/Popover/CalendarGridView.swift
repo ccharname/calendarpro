@@ -135,7 +135,7 @@ private struct CalendarDayCellView: View {
                 .animation(.easeInOut(duration: 0.12), value: isHovered)
 
             // 5. Content (day number + subtitle + optional event dots)
-            VStack(spacing: 3) {
+            VStack(spacing: 1) {
                 Text(day.solarText)
                     .font(.system(size: 16, weight: day.isToday ? .semibold : .medium, design: .rounded))
                     .foregroundStyle(solarTextColor)
