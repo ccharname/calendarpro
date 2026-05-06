@@ -281,7 +281,11 @@ struct EventCardView: View {
                 onToggleReminder?(reminder)
             }
         } label: {
-            Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+            // Use circle.fill (not checkmark.circle.fill) so the completed glyph
+            // shares the empty state's exact bounding box — same visual size, same
+            // baseline. Difference is "open ring" → "solid disk", which together
+            // with the title strikethrough is enough completion signal.
+            Image(systemName: item.isCompleted ? "circle.fill" : "circle")
                 .font(.system(size: 14))
                 .foregroundStyle(
                     item.isCompleted
