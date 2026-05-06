@@ -400,9 +400,11 @@ struct EventListView: View {
 
         if group.items.allSatisfy(\.isReminder) {
             if group.items.allSatisfy(\.isCompleted) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 10))
-                    .foregroundStyle(nodeColor)
+                // Completed reminder: solid disk — identical bounding box to the
+                // uncompleted ring below, so y-baseline matches the time label.
+                Circle()
+                    .fill(nodeColor)
+                    .frame(width: Metrics.railDotSize, height: Metrics.railDotSize)
             } else {
                 Circle()
                     .stroke(nodeColor, lineWidth: 1.6)
