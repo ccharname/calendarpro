@@ -409,7 +409,7 @@ struct EventListView: View {
                 .fixedSize(horizontal: true, vertical: false)
                 .padding(.horizontal, 3)
                 .padding(.vertical, 1)
-                .background(Color.red.opacity(0.14), in: Capsule(style: .continuous))
+                .background(Color(nsColor: .controlBackgroundColor), in: Capsule(style: .continuous))
                 .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
 
             // Thin 1pt red connector line from label edge to dot centre
@@ -579,7 +579,7 @@ struct EventListView: View {
                 .fixedSize(horizontal: true, vertical: false)
                 .padding(.horizontal, 3)
                 .padding(.vertical, 1)
-                .background(Color.red.opacity(0.14), in: Capsule(style: .continuous))
+                .background(Color(nsColor: .controlBackgroundColor), in: Capsule(style: .continuous))
                 .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
                 .offset(y: placement.y - 7)
 

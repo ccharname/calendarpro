@@ -226,6 +226,9 @@ struct EventCardView: View {
             return isSelected ? 0.96 : 0.88
         }
         if item.isCompleted { return 0.5 }
+        // Overdue reminders pop at full opacity — the red strip + red time label
+        // are the visual "you owe this" signal; fading would defeat it.
+        if item.isOverdue(now: now) { return 1 }
         if timelineState == .past, !isSelected { return 0.5 }
         return 1
     }
@@ -281,11 +284,7 @@ struct EventCardView: View {
                 onToggleReminder?(reminder)
             }
         } label: {
-            // Use circle.fill (not checkmark.circle.fill) so the completed glyph
-            // shares the empty state's exact bounding box — same visual size, same
-            // baseline. Difference is "open ring" → "solid disk", which together
-            // with the title strikethrough is enough completion signal.
-            Image(systemName: item.isCompleted ? "circle.fill" : "circle")
+            Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.system(size: 14))
                 .foregroundStyle(
                     item.isCompleted
