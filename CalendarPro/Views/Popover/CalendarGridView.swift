@@ -27,7 +27,8 @@ struct CalendarGridView: View {
                     Text(weekNumberText(for: rowIndex))
                         .font(.system(size: 10, weight: .regular, design: .rounded).monospacedDigit())
                         .foregroundStyle(Color.secondary.opacity(0.55))
-                        .frame(width: weekNumberGutterWidth)
+                        .frame(width: weekNumberGutterWidth, alignment: .top)
+                        .padding(.top, 7)
 
                     ForEach(0..<7, id: \.self) { colIndex in
                         let dayIndex = rowIndex * 7 + colIndex
@@ -157,19 +158,16 @@ private struct CalendarDayCellView: View {
 
             // 6. Top-trailing badge pill — only one at a time to avoid crowding.
             // Priority: holiday/workday badge wins (yellow tile already screams "today").
-            VStack {
-                HStack(spacing: 2) {
-                    Spacer()
-                    if let indicator = badgeIndicator {
-                        badgeView(indicator)
-                    } else if day.isToday {
-                        todayBadgeView
-                    }
+            HStack(spacing: 2) {
+                if let indicator = badgeIndicator {
+                    badgeView(indicator)
+                } else if day.isToday {
+                    todayBadgeView
                 }
-                Spacer()
             }
             .padding(.top, -4)
             .padding(.trailing, -4)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             .allowsHitTesting(false)
         }
         // Outer drop shadow — gives the tile a "floating玩具" feel
@@ -482,11 +480,11 @@ private struct CalendarDayCellView: View {
         case .publicHoliday, .statutoryHoliday:
             return colorScheme == .dark
                 ? Color(red: 0.26, green: 0.09, blue: 0.11).opacity(0.72)
-                : Color.red.opacity(0.08)
+                : Color.red.opacity(0.18)
         case .workingAdjustmentDay:
             return colorScheme == .dark
                 ? Color(red: 0.07, green: 0.18, blue: 0.31).opacity(0.78)
-                : Color.blue.opacity(0.08)
+                : Color.blue.opacity(0.18)
         case .festival:
             return nil
         }
