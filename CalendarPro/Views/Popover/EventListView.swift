@@ -248,6 +248,7 @@ struct EventListView: View {
     let onSelectEvent: (EKEvent) -> Void
     let onToggleReminder: (EKReminder) -> Void
     let onOpenReminder: (EKReminder) -> Void
+    var onDeleteReminder: ((EKReminder) -> Void)?
 
     var body: some View {
         if isLoading {
@@ -467,6 +468,7 @@ struct EventListView: View {
                     showsDisclosure: true,
                     timelineState: timelineState,
                     onToggleReminder: onToggleReminder,
+                    onDeleteReminder: onDeleteReminder,
                     now: currentTime
                 )
             }

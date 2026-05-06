@@ -1065,6 +1065,23 @@
         }
       }
     },
+    "Toggle Completion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toggle Completion"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切换完成状态"
+          }
+        }
+      }
+    },
     "Delete Event?" : {
       "extractionState" : "manual",
       "localizations" : {

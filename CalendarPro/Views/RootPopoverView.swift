@@ -120,6 +120,9 @@ struct RootPopoverView: View {
             onOpenReminder: { reminder in
                 handleOpenReminder(reminder)
             },
+            onDeleteReminder: { reminder in
+                handleDeleteReminder(reminder)
+            },
             onCreateItem: {
                 handleCreateItem()
             },

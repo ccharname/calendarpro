@@ -71,13 +71,12 @@ struct MonthHeaderView: View {
     }
 
     private var vacationGuideButton: some View {
+        // Demoted to secondary styling — Today remains the sole blue accent in the header.
         Button(action: onOpenVacationGuide) {
             headerPillLabel(
                 title: "休假",
-                foregroundStyle: isVacationGuideEnabled ? Color.accentColor : .secondary,
-                backgroundColor: isVacationGuideEnabled
-                    ? Color.accentColor.opacity(0.12)
-                    : Color.primary.opacity(0.06)
+                foregroundStyle: .secondary,
+                backgroundColor: Color.secondary.opacity(0.1)
             )
         }
         .buttonStyle(.plain)

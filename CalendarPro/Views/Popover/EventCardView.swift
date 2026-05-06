@@ -19,6 +19,7 @@ struct EventCardView: View {
     let showsDisclosure: Bool
     let timelineState: EventCardTimelineState
     var onToggleReminder: ((EKReminder) -> Void)?
+    var onDeleteReminder: ((EKReminder) -> Void)?
     /// Current time used for overdue calculations. Defaults to `Date()` for previews.
     var now: Date
 
@@ -28,6 +29,7 @@ struct EventCardView: View {
         showsDisclosure: Bool = true,
         timelineState: EventCardTimelineState = .regular,
         onToggleReminder: ((EKReminder) -> Void)? = nil,
+        onDeleteReminder: ((EKReminder) -> Void)? = nil,
         now: Date = Date()
     ) {
         self.item = item
@@ -35,6 +37,7 @@ struct EventCardView: View {
         self.showsDisclosure = showsDisclosure
         self.timelineState = timelineState
         self.onToggleReminder = onToggleReminder
+        self.onDeleteReminder = onDeleteReminder
         self.now = now
     }
 
@@ -101,6 +104,7 @@ struct EventCardView: View {
                         .strikethrough(item.isCompleted || item.isCanceled)
                         .foregroundStyle(titleColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .animation(.easeInOut(duration: 0.2), value: item.isCompleted)
                 }
 
                 if let secondaryText {
@@ -123,6 +127,19 @@ struct EventCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .opacity(contentOpacity)
+        .animation(.easeInOut(duration: 0.2), value: item.isCompleted)
+        .shadow(
+            color: ongoingGlowColor,
+            radius: 4
+        )
+        .contextMenu {
+            if let reminder = item.ekReminder {
+                Button(L("Toggle Completion")) { onToggleReminder?(reminder) }
+                // TODO: postpone follow-up — write-back requires deeper EKReminder date mutation
+                Divider()
+                Button(L("Delete"), role: .destructive) { onDeleteReminder?(reminder) }
+            }
+        }
     }
 
     private var timeRangeText: String {
@@ -179,10 +196,20 @@ struct EventCardView: View {
         if item.isCanceled {
             return isSelected ? 0.96 : 0.88
         }
-        if timelineState == .past, !isSelected {
-            return 0.78
-        }
+        // Completed reminders fade out; past events also fade
+        if item.isCompleted { return 0.55 }
+        if timelineState == .past, !isSelected { return 0.55 }
         return 1
+    }
+
+    /// Soft accent-color glow for ongoing events only.
+    private var ongoingGlowColor: Color {
+        guard timelineState == .ongoing, !item.isCanceled, !isSelected else { return .clear }
+        return Color(nsColor: item.color).opacity(0.4)
+    }
+
+    private var pastTimeTextColor: Color {
+        timelineState == .past ? Color(nsColor: .tertiaryLabelColor) : .secondary
     }
 
     private var indicatorColor: Color {
@@ -193,6 +220,7 @@ struct EventCardView: View {
     private var timeTextColor: Color {
         if item.isCanceled { return Color(nsColor: .tertiaryLabelColor) }
         if item.isOverdue(now: now) { return .red }
+        if timelineState == .past { return Color(nsColor: .tertiaryLabelColor) }
         return .secondary
     }
 
