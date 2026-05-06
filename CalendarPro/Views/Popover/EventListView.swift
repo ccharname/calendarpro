@@ -218,25 +218,34 @@ struct EventTimelineSnapshot {
     }
 }
 
+// MARK: - EventListView
+
 struct EventListView: View {
     private struct WithinItemMarkerPlacement {
         let frame: CGRect
         let y: CGFloat
     }
 
+    // Design tokens — uniform, locked.
     private enum Metrics {
-        static let timeLaneWidth: CGFloat = 46
-        static let railLaneWidth: CGFloat = 12
-        static let laneSpacing: CGFloat = 6
-        static let contentSpacing: CGFloat = 6
-        static let timelineColumnWidth: CGFloat = timeLaneWidth + laneSpacing + railLaneWidth
-        static let markerDotSize: CGFloat = 8
-        static let markerChipHeight: CGFloat = 18
-        static let markerChipHorizontalPadding: CGFloat = 6
-        static let markerMinimumInset: CGFloat = 12
-        static let markerChipCornerRadius: CGFloat = 6
-        static let markerConnectorHeight: CGFloat = 1
-        static let markerLineTrailingInset: CGFloat = 10
+        /// Fixed width for the HH:mm time label column (right-aligned text).
+        static let timeLabelWidth: CGFloat = 50
+        /// Rail column (dot + vertical line).
+        static let railWidth: CGFloat = 12
+        /// Gap between the time-label column and the rail column.
+        static let laneSpacing: CGFloat = 4
+        /// Gap between the rail column and the card area.
+        static let cardSpacing: CGFloat = 6
+        /// Total timeline column width consumed before cards start.
+        static let timelineColumnWidth: CGFloat = timeLabelWidth + laneSpacing + railWidth + cardSpacing
+        /// Dot diameter on the rail aligned to card top.
+        static let railDotSize: CGFloat = 6
+        /// Now-marker red dot diameter (same as rail dots for visual consistency).
+        static let nowDotSize: CGFloat = 6
+        /// Vertical gap between cards in the same time group.
+        static let cardSpacingInGroup: CGFloat = 6
+        /// Vertical gap between time groups (12pt rhythm).
+        static let groupSpacing: CGFloat = 12
     }
 
     let items: [CalendarItem]
@@ -284,8 +293,10 @@ struct EventListView: View {
         }
     }
 
+    // MARK: - Timeline Content
+
     private var timelineContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Metrics.groupSpacing) {
             ForEach(Array(timelineSnapshot.timedGroups.enumerated()), id: \.element.id) { index, group in
                 timedGroupView(
                     group,
@@ -313,18 +324,7 @@ struct EventListView: View {
         }
     }
 
-    private var timelineSnapshot: EventTimelineSnapshot {
-        EventTimelineSnapshot.make(
-            items: items,
-            selectedDate: selectedDate,
-            now: currentTime,
-            calendar: .autoupdatingCurrent
-        )
-    }
-
-    private var currentTime: Date {
-        timeRefreshCoordinator.currentDate
-    }
+    // MARK: - Timed group
 
     private func timedGroupView(
         _ group: EventTimelineGroup,
@@ -332,15 +332,31 @@ struct EventListView: View {
         isLast: Bool,
         markerPosition: EventTimelineMarkerPosition?
     ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Now-marker BEFORE group (rail column only, no bleed into cards)
             if markerPosition == .beforeGroup {
-                nowMarkerView
+                nowMarkerRow
             }
 
-            HStack(alignment: .top, spacing: Metrics.contentSpacing) {
-                timelineColumn(for: group, isFirst: isFirst)
+            // Time label + rail + cards
+            HStack(alignment: .top, spacing: 0) {
+                // Fixed-width time label (right-aligned)
+                Text(group.displayTime)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(timeLabelColor(for: group))
+                    .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
+                    // Offset the label 2pt down so it visually aligns with the card top edge.
+                    .padding(.top, 2)
 
-                VStack(alignment: .leading, spacing: 6) {
+                // Rail column
+                Spacer().frame(width: Metrics.laneSpacing)
+                railColumn(for: group, isFirst: isFirst)
+                    .frame(width: Metrics.railWidth)
+                Spacer().frame(width: Metrics.cardSpacing)
+
+                // Cards
+                VStack(alignment: .leading, spacing: Metrics.cardSpacingInGroup) {
                     ForEach(group.items) { item in
                         itemButton(item, timelineState: timelineState(for: item))
                     }
@@ -348,46 +364,31 @@ struct EventListView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
 
+            // Now-marker AFTER group (last group only — all items in the past)
             if markerPosition == .afterGroup, isLast {
-                nowMarkerView
+                nowMarkerRow
             }
         }
     }
 
-    private func timelineColumn(for group: EventTimelineGroup, isFirst: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .top, spacing: Metrics.laneSpacing) {
-                Text(group.displayTime)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(timeLabelColor(for: group))
-                    .frame(width: Metrics.timeLaneWidth, alignment: .trailing)
+    // MARK: - Rail column
 
-                Color.clear
-                    .frame(width: Metrics.railLaneWidth, height: 1)
-            }
+    private func railColumn(for group: EventTimelineGroup, isFirst: Bool) -> some View {
+        ZStack(alignment: .top) {
+            // Vertical connector line
+            Rectangle()
+                .fill(Color(nsColor: .separatorColor).opacity(0.25))
+                .frame(width: 1)
 
-            HStack(alignment: .top, spacing: Metrics.laneSpacing) {
-                Color.clear
-                    .frame(width: Metrics.timeLaneWidth, height: 1)
-
-                ZStack(alignment: .top) {
-                    Rectangle()
-                        .fill(Color(nsColor: .separatorColor).opacity(0.25))
-                        .frame(width: 1)
-
-                    timelineNode(for: group)
-                        .padding(.top, isFirst ? 0 : 2)
-                }
-                .frame(width: Metrics.railLaneWidth)
-                .frame(maxHeight: .infinity)
-            }
+            // Rail dot — 6pt diameter, aligned 6pt from card top
+            railDot(for: group)
+                .padding(.top, 6)
         }
-        .frame(width: Metrics.timelineColumnWidth, alignment: .topLeading)
+        .frame(maxHeight: .infinity)
     }
 
     @ViewBuilder
-    private func timelineNode(for group: EventTimelineGroup) -> some View {
+    private func railDot(for group: EventTimelineGroup) -> some View {
         let referenceItem = group.items.first(where: { !$0.isReminder }) ?? group.items.first
         let nodeColor = Color(nsColor: referenceItem?.color ?? .secondaryLabelColor)
 
@@ -399,38 +400,57 @@ struct EventListView: View {
             } else {
                 Circle()
                     .stroke(nodeColor, lineWidth: 1.6)
-                    .frame(width: 8, height: 8)
+                    .frame(width: Metrics.railDotSize, height: Metrics.railDotSize)
                     .background(Color(nsColor: .windowBackgroundColor), in: Circle())
             }
         } else {
             Circle()
                 .fill(nodeColor)
-                .frame(width: 8, height: 8)
+                .frame(width: Metrics.railDotSize, height: Metrics.railDotSize)
         }
     }
 
-    private var nowMarkerView: some View {
-        // Confine the red line to the rail column only — it must not bleed into the card area.
-        HStack(alignment: .center, spacing: Metrics.laneSpacing) {
-            markerTimeChip
-                .frame(width: Metrics.timeLaneWidth, alignment: .trailing)
+    // MARK: - Now-marker
 
-            Circle()
+    /// The now-marker occupies only the time-label + rail columns (timeLabelWidth + laneSpacing +
+    /// railWidth). It does NOT extend into the card area. A 1pt red horizontal line bridges the
+    /// gap from the label trailing edge to the rail centre.
+    private var nowMarkerRow: some View {
+        HStack(alignment: .center, spacing: 0) {
+            // Red time label — same font/size as gray time labels, only colour differs (no pill).
+            Text(formattedCurrentTime)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(.red)
+                .monospacedDigit()
+                .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
+
+            // Thin 1pt red connector line from label edge to dot centre
+            Rectangle()
                 .fill(Color.red)
-                .frame(width: Metrics.markerDotSize, height: Metrics.markerDotSize)
-                .frame(width: Metrics.railLaneWidth)
+                .frame(width: Metrics.laneSpacing, height: 1)
+
+            // Red dot centred in rail column
+            ZStack {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: Metrics.nowDotSize, height: Metrics.nowDotSize)
+            }
+            .frame(width: Metrics.railWidth)
+
+            // No card-area extension — spacer stops here
         }
-        .frame(width: Metrics.timelineColumnWidth, alignment: .leading)
-        .padding(.vertical, 2)
+        .padding(.vertical, 3)
     }
+
+    // MARK: - Auxiliary sections (all-day, untimed)
 
     private func auxiliarySection(title: String, items: [CalendarItem]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Metrics.cardSpacingInGroup) {
             Text(title)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Metrics.cardSpacingInGroup) {
                 ForEach(items) { item in
                     itemButton(item, timelineState: .regular)
                 }
@@ -438,6 +458,8 @@ struct EventListView: View {
         }
         .padding(.top, 4)
     }
+
+    // MARK: - Item buttons
 
     @ViewBuilder
     private func itemButton(_ item: CalendarItem, timelineState: EventCardTimelineState) -> some View {
@@ -479,6 +501,21 @@ struct EventListView: View {
         }
     }
 
+    // MARK: - Helpers
+
+    private var timelineSnapshot: EventTimelineSnapshot {
+        EventTimelineSnapshot.make(
+            items: items,
+            selectedDate: selectedDate,
+            now: currentTime,
+            calendar: .autoupdatingCurrent
+        )
+    }
+
+    private var currentTime: Date {
+        timeRefreshCoordinator.currentDate
+    }
+
     private func timelineState(for item: CalendarItem) -> EventCardTimelineState {
         guard let status = item.timelineStatus(at: currentTime, calendar: .autoupdatingCurrent) else {
             return .regular
@@ -501,6 +538,22 @@ struct EventListView: View {
         return marker.position
     }
 
+    private var formattedCurrentTime: String {
+        DateFormatters.shortTime(for: AppLocalization.locale).string(from: currentTime)
+    }
+
+    private func timeLabelColor(for group: EventTimelineGroup) -> Color {
+        if group.containsOngoingItem {
+            return .red
+        }
+        if group.isPast {
+            return Color(nsColor: .tertiaryLabelColor)
+        }
+        return .secondary
+    }
+
+    // MARK: - Within-item marker overlay
+
     private func withinItemMarkerPlacement(
         using anchors: [String: Anchor<CGRect>],
         in proxy: GeometryProxy
@@ -517,6 +570,45 @@ struct EventListView: View {
         return WithinItemMarkerPlacement(frame: frame, y: y)
     }
 
+    private func markerY(for frame: CGRect, progress: Double) -> CGFloat {
+        let clampedProgress = min(max(progress, 0), 1)
+        let minimumInset: CGFloat = 12
+        let inset = min(minimumInset, frame.height / 2)
+        let usableHeight = max(frame.height - inset * 2, 0)
+        return frame.minY + inset + usableHeight * clampedProgress
+    }
+
+    private func withinItemMarkerOverlay(placement: WithinItemMarkerPlacement) -> some View {
+        // The overlay sits in the time-label + rail columns only (same layout as nowMarkerRow).
+        let dotCenterX = Metrics.timeLabelWidth + Metrics.laneSpacing + (Metrics.railWidth / 2)
+
+        return ZStack(alignment: .topLeading) {
+            // Red time label (no pill, matches nowMarkerRow style)
+            Text(formattedCurrentTime)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(.red)
+                .monospacedDigit()
+                .frame(width: Metrics.timeLabelWidth, alignment: .trailing)
+                .offset(y: placement.y - 7)
+
+            // Thin 1pt connector
+            Rectangle()
+                .fill(Color.red)
+                .frame(width: Metrics.laneSpacing, height: 1)
+                .offset(x: Metrics.timeLabelWidth, y: placement.y)
+
+            // Red dot
+            Circle()
+                .fill(Color.red)
+                .frame(width: Metrics.nowDotSize, height: Metrics.nowDotSize)
+                .offset(
+                    x: dotCenterX - (Metrics.nowDotSize / 2),
+                    y: placement.y - (Metrics.nowDotSize / 2)
+                )
+        }
+        .allowsHitTesting(false)
+    }
+
     private func scrollToActiveGroup(using proxy: ScrollViewProxy) {
         guard let targetID = timelineSnapshot.scrollTargetGroupID else { return }
         let anchor: UnitPoint = timelineSnapshot.shouldAnchorBottom ? .bottom : .top
@@ -524,54 +616,5 @@ struct EventListView: View {
         DispatchQueue.main.async {
             proxy.scrollTo(targetID, anchor: anchor)
         }
-    }
-
-    private func timeLabelColor(for group: EventTimelineGroup) -> Color {
-        if group.containsOngoingItem {
-            return .red
-        }
-        if group.isPast {
-            return Color(nsColor: .tertiaryLabelColor)
-        }
-        return .secondary
-    }
-
-    private var formattedCurrentTime: String {
-        DateFormatters.shortTime(for: AppLocalization.locale).string(from: currentTime)
-    }
-
-    private func markerY(for frame: CGRect, progress: Double) -> CGFloat {
-        let clampedProgress = min(max(progress, 0), 1)
-        let inset = min(Metrics.markerMinimumInset, frame.height / 2)
-        let usableHeight = max(frame.height - inset * 2, 0)
-        return frame.minY + inset + usableHeight * clampedProgress
-    }
-
-    private func withinItemMarkerOverlay(placement: WithinItemMarkerPlacement) -> some View {
-        let railCenterX = Metrics.timeLaneWidth + Metrics.laneSpacing + (Metrics.railLaneWidth / 2)
-
-        return ZStack(alignment: .topLeading) {
-            markerTimeChip
-                .frame(width: Metrics.timeLaneWidth, alignment: .trailing)
-                .offset(y: placement.y - (Metrics.markerChipHeight / 2))
-
-            Circle()
-                .fill(Color.red)
-                .frame(width: Metrics.markerDotSize, height: Metrics.markerDotSize)
-                .offset(
-                    x: railCenterX - (Metrics.markerDotSize / 2),
-                    y: placement.y - (Metrics.markerDotSize / 2)
-                )
-        }
-        .allowsHitTesting(false)
-    }
-
-    private var markerTimeChip: some View {
-        // Match the gray hour labels' style — same font, same baseline, only color differs.
-        // No background pill: keeps the left-edge of every time label visually aligned.
-        Text(formattedCurrentTime)
-            .font(.system(size: 10, weight: .semibold, design: .rounded))
-            .foregroundStyle(.red)
-            .monospacedDigit()
     }
 }

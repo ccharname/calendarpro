@@ -44,64 +44,48 @@ struct EventCardView: View {
     init(event: EKEvent, isSelected: Bool) {
         self.init(item: .event(event), isSelected: isSelected)
     }
-    
+
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            // Overdue left-edge accent (2pt red strip) — shown before the ongoing stripe
-            if item.isOverdue(now: now), !item.isCanceled {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(Color.red)
-                    .frame(width: 2)
-                    .padding(.vertical, 2)
-            } else if timelineState == .ongoing && !item.isCanceled {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(Color(nsColor: item.color))
-                    .frame(width: 3)
-                    .padding(.vertical, 2)
-            }
-
-            if item.isReminder {
-                reminderCheckbox
-                    .padding(.top, 2)
-            } else {
-                Circle()
-                    .fill(indicatorColor)
-                    .frame(width: 6, height: 6)
-                    .padding(.top, 4)
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                let hasTimeText = !timeRangeText.isEmpty
-                let hasMetadata = showsDisclosure && !metadataItems.isEmpty
-                if hasTimeText || hasMetadata {
-                    HStack(alignment: .top, spacing: 8) {
-                        if hasTimeText {
-                            Text(timeRangeText)
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(timeTextColor)
-                        }
-
-                        Spacer(minLength: 8)
-
-                        if hasMetadata {
-                            HStack(spacing: 5) {
-                                ForEach(Array(metadataItems.enumerated()), id: \.offset) { _, metadata in
-                                    metadataView(metadata)
-                                }
-                            }
-                            .fixedSize(horizontal: true, vertical: false)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(alignment: .top, spacing: 0) {
+            // Leading accent strip: 2pt red for overdue, 3pt accent-color for ongoing.
+            // Cancelled and completed reminders get no strip.
+            if !item.isCanceled {
+                if item.isOverdue(now: now) {
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color.red)
+                        .frame(width: 2)
+                        .padding(.vertical, 6)
+                        .padding(.trailing, 6)
+                } else if timelineState == .ongoing {
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color(nsColor: item.color))
+                        .frame(width: 3)
+                        .padding(.vertical, 6)
+                        .padding(.trailing, 6)
                 }
+            }
 
-                // Priority indicator prefix + title, composed as HStack to preserve strikethrough
+            VStack(alignment: .leading, spacing: 4) {
+                // ── Title row ──────────────────────────────────────────────
                 HStack(alignment: .top, spacing: 4) {
+                    // Reminder checkbox / event color dot
+                    if item.isReminder {
+                        reminderCheckbox
+                            .padding(.top, 1)
+                    } else {
+                        Circle()
+                            .fill(indicatorColor)
+                            .frame(width: 6, height: 6)
+                            .padding(.top, 4)
+                    }
+
+                    // Priority indicator prefix (!, !!, !!!) inline before title
                     if let priority = item.reminderPriority, priority > 0 {
                         Text(priorityExclamationText(priority))
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(priorityColor(priority))
                             .fixedSize()
+                            .padding(.top, 1)
                     }
 
                     Text(item.title)
@@ -111,20 +95,28 @@ struct EventCardView: View {
                         .foregroundStyle(titleColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .animation(.easeInOut(duration: 0.2), value: item.isCompleted)
+
+                    // Metadata icons: right side of the title row
+                    if showsDisclosure, !metadataItems.isEmpty {
+                        HStack(spacing: 5) {
+                            ForEach(Array(metadataItems.enumerated()), id: \.offset) { _, metadata in
+                                metadataView(metadata)
+                            }
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+                    }
                 }
 
-                if let secondaryText {
-                    Text(secondaryText)
-                        .font(.system(size: 10))
-                        .foregroundStyle(secondaryTextColor)
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                // ── Bottom info row: project · status ──────────────────────
+                // Always present — replaces the old orphaned secondaryText block.
+                // Combines: calendar name · end-time (events) or overdue/recurrence label (reminders)
+                bottomInfoRow
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 10)
         .padding(.vertical, 8)
+        .frame(minHeight: 56, alignment: .top)
         .background(backgroundColor)
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -141,32 +133,64 @@ struct EventCardView: View {
         .contextMenu {
             if let reminder = item.ekReminder {
                 Button(L("Toggle Completion")) { onToggleReminder?(reminder) }
-                // TODO: postpone follow-up — write-back requires deeper EKReminder date mutation
                 Divider()
                 Button(L("Delete"), role: .destructive) { onDeleteReminder?(reminder) }
             }
         }
     }
 
-    private var timeRangeText: String {
-        if item.isAllDay {
-            return L("All Day")
-        }
+    // MARK: - Bottom info row
 
-        guard item.timelineDate != nil else {
-            return L("No Time")
+    @ViewBuilder
+    private var bottomInfoRow: some View {
+        let parts = bottomInfoParts
+        if !parts.isEmpty {
+            Text(parts.joined(separator: " · "))
+                .font(.system(size: 10))
+                .foregroundStyle(bottomInfoColor)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-
-        // Start time is shown on the left timeline lane — only render in-card when
-        // there's additional info (end time for ranges, or all-day text).
-        if let endDate = item.endDate {
-            let formatter = DateFormatters.shortTime(for: AppLocalization.locale)
-            return "→ \(formatter.string(from: endDate))"
-        }
-
-        // Single-point items (reminders / events without endDate) — lane suffices.
-        return ""
     }
+
+    private var bottomInfoParts: [String] {
+        var parts: [String] = []
+
+        // Calendar / list name
+        let src = item.sourceTitle
+        if !src.isEmpty {
+            parts.append(src)
+        }
+
+        // Location (events only) — takes precedence over end-time as secondary info
+        if let location = item.location, !location.isEmpty {
+            parts.append(location)
+            return parts
+        }
+
+        // End-time for timed events (→ HH:mm)
+        if case .event = item {
+            if !item.isAllDay, let endDate = item.endDate {
+                let formatter = DateFormatters.shortTime(for: AppLocalization.locale)
+                parts.append("→ \(formatter.string(from: endDate))")
+            }
+        }
+
+        // Overdue label for reminders
+        if item.isOverdue(now: now) {
+            parts.append(L("Overdue"))
+        }
+
+        return parts
+    }
+
+    private var bottomInfoColor: Color {
+        if item.isCanceled { return Color(nsColor: .tertiaryLabelColor) }
+        if item.isOverdue(now: now) { return .red.opacity(0.8) }
+        return .secondary.opacity(0.8)
+    }
+
+    // MARK: - Colors & appearance
 
     private var backgroundColor: Color {
         if item.isCanceled {
@@ -179,7 +203,7 @@ struct EventCardView: View {
             return Color.accentColor.opacity(0.08)
         }
         if timelineState == .past {
-            return Color(nsColor: .controlBackgroundColor).opacity(0.75)
+            return Color(nsColor: .controlBackgroundColor).opacity(0.6)
         }
         return Color(nsColor: .controlBackgroundColor)
     }
@@ -201,9 +225,8 @@ struct EventCardView: View {
         if item.isCanceled {
             return isSelected ? 0.96 : 0.88
         }
-        // Completed reminders fade out; past events also fade
-        if item.isCompleted { return 0.55 }
-        if timelineState == .past, !isSelected { return 0.55 }
+        if item.isCompleted { return 0.5 }
+        if timelineState == .past, !isSelected { return 0.5 }
         return 1
     }
 
@@ -213,20 +236,9 @@ struct EventCardView: View {
         return Color(nsColor: item.color).opacity(0.4)
     }
 
-    private var pastTimeTextColor: Color {
-        timelineState == .past ? Color(nsColor: .tertiaryLabelColor) : .secondary
-    }
-
     private var indicatorColor: Color {
         let color = Color(nsColor: item.color)
         return item.isCanceled ? color.opacity(0.4) : color
-    }
-
-    private var timeTextColor: Color {
-        if item.isCanceled { return Color(nsColor: .tertiaryLabelColor) }
-        if item.isOverdue(now: now) { return .red }
-        if timelineState == .past { return Color(nsColor: .tertiaryLabelColor) }
-        return .secondary
     }
 
     private var titleColor: Color {
@@ -234,13 +246,6 @@ struct EventCardView: View {
             return .secondary
         }
         return .primary
-    }
-
-    private var secondaryTextColor: Color {
-        if item.isCanceled {
-            return Color(nsColor: .tertiaryLabelColor)
-        }
-        return .secondary.opacity(0.8)
     }
 
     private var metadataColor: Color {
@@ -268,14 +273,7 @@ struct EventCardView: View {
         return items
     }
 
-    private var secondaryText: String? {
-        if let location = item.location, !location.isEmpty {
-            return location
-        }
-
-        let sourceTitle = item.sourceTitle
-        return sourceTitle.isEmpty ? nil : sourceTitle
-    }
+    // MARK: - Reminder checkbox
 
     private var reminderCheckbox: some View {
         Button {
