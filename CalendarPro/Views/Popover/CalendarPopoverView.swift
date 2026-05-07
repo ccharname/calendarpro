@@ -196,7 +196,7 @@ struct CalendarPopoverView: View {
                     onOpenReminder: onOpenReminder,
                     onDeleteReminder: onDeleteReminder
                 )
-                .frame(maxHeight: 200)
+                .frame(maxHeight: 240)
             }
         }
     }
@@ -273,10 +273,12 @@ struct CalendarPopoverView: View {
 
     /// Hoisted out of `body` — the gradient instance is identical every render and shouldn't
     /// be reconstructed on each redraw (popover-wide redraws fire on time tick / weather refresh).
+    /// Both stops use windowBackgroundColor — flat fill expressed as gradient so type-stays-stable
+    /// for the static `let` and any future tint can drop in without touching the call site.
     private static let popoverBackgroundGradient = LinearGradient(
         colors: [
             Color(nsColor: .windowBackgroundColor),
-            Color.accentColor.opacity(0.04)
+            Color(nsColor: .windowBackgroundColor)
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing

@@ -10,14 +10,14 @@ struct CalendarGridView: View {
     @Namespace private var selectionNamespace
 
     var body: some View {
-        Grid(horizontalSpacing: 6, verticalSpacing: 6) {
+        Grid(horizontalSpacing: 5, verticalSpacing: 5) {
             GridRow {
                 // Week-number gutter header — empty spacer, fixed width
                 Color.clear.frame(width: weekNumberGutterWidth)
 
                 ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { index, symbol in
                     Text(symbol)
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundStyle(weekdayHeaderColor(isWeekend: weekendIndices.contains(index)))
                         .frame(maxWidth: .infinity)
                 }
@@ -74,7 +74,8 @@ struct CalendarGridView: View {
     }
 
     private func weekdayHeaderColor(isWeekend: Bool) -> Color {
-        guard highlightWeekends && isWeekend else { return .secondary }
+        // Fixed opacity beats `.secondary` — system semantic gets too bright in dark mode.
+        guard highlightWeekends && isWeekend else { return Color.primary.opacity(0.55) }
         return colorScheme == .dark
             ? Color(red: 0.92, green: 0.45, blue: 0.45)
             : Color(red: 0.85, green: 0.35, blue: 0.35)
@@ -91,8 +92,9 @@ struct CalendarGridView: View {
 
 // MeeGo icon-tile squircle (continuous curvature).
 // N9 / Harmattan 80×80 spec: 22–24pt corner = 27–30% × short side.
-// We use 35% (12pt × 34pt short side) — N9 baseline + slight 玩具感 amplification.
-private let meegoCellCornerRadius: CGFloat = 12
+// 10pt × 32pt cell short side ≈ 31% — sits at N9 baseline + 1pp 玩具感 amplification.
+// Down from 12pt at 36pt; pre-emptively avoids >40% capsule drift after density tighten.
+private let meegoCellCornerRadius: CGFloat = 10
 
 private struct CalendarDayCellView: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -145,23 +147,32 @@ private struct CalendarDayCellView: View {
             // 5. Content (day number + subtitle + optional event dots)
             VStack(spacing: 1) {
                 Text(day.solarText)
-                    .font(.system(size: 16, weight: day.isToday ? .semibold : .medium, design: .rounded))
+                    .font(.system(size: 13, weight: day.isToday ? .bold : .regular, design: .rounded))
                     .foregroundStyle(solarTextColor)
 
                 let subtitleText: String? = {
-                    if let badge = day.badges.first, badge.kind == .workingAdjustmentDay {
-                        return day.lunarText
+                    if let badge = day.badges.first {
+                        switch badge.kind {
+                        case .publicHoliday, .statutoryHoliday, .workingAdjustmentDay:
+                            // Pill badge ("休"/"班") already conveys holiday/workday status —
+                            // subtitle hands the slot to lunar text instead of repeating
+                            // "劳动节" etc. Eliminates 3-char truncation on 37pt cells.
+                            return day.lunarText
+                        case .festival:
+                            // Festivals have no pill badge → subtitle carries the festival name.
+                            return badge.text
+                        }
                     }
-                    return day.badges.first?.text ?? day.lunarText
+                    return day.lunarText
                 }()
                 Text(subtitleText ?? "")
-                    .font(.system(size: 8, weight: .regular, design: .rounded))
+                    .font(.system(size: 9, weight: .regular, design: .rounded))
                     .foregroundStyle(subtitleColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            .frame(maxWidth: .infinity, minHeight: 34)
-            .padding(.vertical, 2)
+            .frame(maxWidth: .infinity, minHeight: 30)
+            .padding(.vertical, 1)
             .padding(.horizontal, 4)
 
             // 6. Top-trailing badge pill — only one at a time to avoid crowding.
@@ -301,10 +312,11 @@ private struct CalendarDayCellView: View {
     /// Even "normal" cells get a faint base so the gradient + gloss read as a 3D tile.
     private var cellBaseColor: Color {
         if day.isToday {
-            // Today: yellow tile per lucky-toolkit token
+            // Today: warm amber tile (desaturated −7% from #FFCF40/#FFD75E for refinement;
+            // keeps MeeGo "yellow" identity but stops screaming against near-white surface).
             return colorScheme == .dark
-                ? Color(red: 1.0, green: 0.843, blue: 0.369)  // #FFD75E
-                : Color(red: 1.0, green: 0.812, blue: 0.251)  // #FFCF40
+                ? Color(red: 0.949, green: 0.796, blue: 0.353)  // #F2CB5A
+                : Color(red: 0.949, green: 0.753, blue: 0.302)  // #F2C04D
         }
 
         if day.isSelected {
@@ -396,9 +408,10 @@ private struct CalendarDayCellView: View {
 
     private var glowColor: Color {
         if day.isToday {
+            // Tracks new today fill (#F2CB5A dark / #F2C04D light)
             return (colorScheme == .dark
-                ? Color(red: 1.0, green: 0.843, blue: 0.369)
-                : Color(red: 1.0, green: 0.812, blue: 0.251)).opacity(0.45)
+                ? Color(red: 0.949, green: 0.796, blue: 0.353)
+                : Color(red: 0.949, green: 0.753, blue: 0.302)).opacity(0.45)
         }
         if day.isSelected {
             return Color(red: 0.471, green: 0.549, blue: 1.0).opacity(0.35)
@@ -436,16 +449,16 @@ private struct CalendarDayCellView: View {
 
         if highlightWeekends && day.isWeekend {
             return colorScheme == .dark
-                ? Color(red: 1.0, green: 0.42, blue: 0.48).opacity(0.32)
-                : Color(red: 0.878, green: 0.31, blue: 0.373).opacity(0.32)
+                ? Color(red: 1.0, green: 0.42, blue: 0.48).opacity(0.42)
+                : Color(red: 0.878, green: 0.31, blue: 0.373).opacity(0.42)
         }
 
-        // Adjacent-month: 32% opacity; Future fallback: 55% opacity
+        // Adjacent-month: 42% opacity (was 32%, too faded to scan)
         if semanticStyle != nil {
-            return Color.primary.opacity(colorScheme == .dark ? 0.55 : 0.32)
+            return Color.primary.opacity(colorScheme == .dark ? 0.55 : 0.42)
         }
 
-        return .secondary.opacity(0.32)
+        return .secondary.opacity(0.42)
     }
 
     private var subtitleColor: Color {
@@ -497,15 +510,19 @@ private struct CalendarDayCellView: View {
     private var semanticBaseColor: Color? {
         guard let badge = day.badges.first else { return nil }
 
+        // Light-mode opacity dropped 0.18 → 0.12: holiday cells were out-shouting
+        // today's amber tile after the density tighten; gradient + gloss stack
+        // already amplifies the base by ~20%, so 0.12 reads as a tinted card not a
+        // saturated panel. Dark mode keeps richer values (UI surface is darker).
         switch badge.kind {
         case .publicHoliday, .statutoryHoliday:
             return colorScheme == .dark
-                ? Color(red: 0.26, green: 0.09, blue: 0.11).opacity(0.72)
-                : Color.red.opacity(0.18)
+                ? Color(red: 0.26, green: 0.09, blue: 0.11).opacity(0.62)
+                : Color.red.opacity(0.12)
         case .workingAdjustmentDay:
             return colorScheme == .dark
-                ? Color(red: 0.07, green: 0.18, blue: 0.31).opacity(0.78)
-                : Color.blue.opacity(0.18)
+                ? Color(red: 0.07, green: 0.18, blue: 0.31).opacity(0.68)
+                : Color.blue.opacity(0.12)
         case .festival:
             return nil
         }
