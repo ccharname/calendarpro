@@ -53,14 +53,14 @@ struct MonthHeaderView: View {
             HStack(spacing: 4) {
                 Button(action: onSelectYear) {
                     Text(yearText)
-                        .font(.system(.title3, design: .rounded).weight(.semibold))
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.primary)
                 }
                 .buttonStyle(.plain)
 
                 Button(action: onSelectMonth) {
                     Text(monthText)
-                        .font(.system(.title3, design: .rounded).weight(.semibold))
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundStyle(.primary)
                 }
                 .buttonStyle(.plain)
